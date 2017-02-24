@@ -1,0 +1,124 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <!-- <LinearLayout -->
+        <!-- android:layout_width="fill_parent" -->
+        <!-- android:layout_height="48dp" -->
+        <!-- android:layout_alignParentTop="true" -->
+        <!-- android:background="#e8e8e7" -->
+        <!-- android:orientation="horizontal" > -->
+
+
+        <!-- <ImageView -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_height="wrap_content" -->
+        <!-- android:layout_marginLeft="10dp" -->
+        <!-- android:background="@drawable/linkedin" /> -->
+
+
+        <!-- <TextView -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_height="wrap_content" -->
+        <!-- android:layout_gravity="center_horizontal|center_vertical" -->
+        <!-- android:layout_marginLeft="25dp" -->
+        <!-- android:text="Sign up" -->
+        <!-- android:textColor="#2582C5" -->
+        <!-- android:textSize="18sp" -->
+        <!-- android:textStyle="bold" /> -->
+
+
+        <!-- <LinearLayout -->
+        <!-- android:layout_width="fill_parent" -->
+        <!-- android:layout_height="48dp" -->
+        <!-- android:gravity="right" -->
+        <!-- android:orientation="horizontal" > -->
+
+
+        <!-- <ImageView -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_height="wrap_content" -->
+        <!-- android:background="@drawable/select" /> -->
+        <!-- </LinearLayout> -->
+        <!-- </LinearLayout> -->
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="30dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/greybackground"
+            android:orientation="vertical" >
+
+            <!-- <ImageView -->
+            <!-- android:layout_width="60dp" -->
+            <!-- android:layout_height="60dp" -->
+            <!-- android:layout_gravity="center_horizontal" -->
+            <!-- android:layout_marginTop="15dp" -->
+            <!-- android:background="@drawable/plan" /> -->
+
+            <EditText
+                android:id="@+id/taskDescId"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:background="#f3f3f3"
+                android:gravity="top|left"
+                android:hint="Work Description?"
+                android:inputType="textMultiLine"
+                android:lines="8"
+                android:maxLines="10"
+                android:minLines="5"
+                android:paddingLeft="5dp"
+                android:scrollbars="vertical" />
+
+            <EditText
+                android:id="@+id/commentsId"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="45dp"
+                android:background="#f3f3f3"
+                android:gravity="top|left"
+                android:hint="Comments"
+                android:lines="8"
+                android:maxLines="10"
+                android:minLines="3"
+                android:paddingLeft="5dp"
+                android:scrollbars="vertical" />
+
+            <Spinner
+                android:id="@+id/categoryId"
+                android:layout_marginTop="50dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/task_categories_arrays"
+                android:hint="Work Category" />
+
+            <Button
+                android:id="@+id/submitId"
+                android:layout_width="190dp"
+                android:layout_height="38dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="55dp"
+                android:background="@drawable/btn"
+                android:text="submit"
+                android:textColor="#fff" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">a-ztask</string>
+    <string name="send_to">Share</string>
+    <string name="action_settings">CardViewTutorial</string>
+    
+        <string-array name="task_categories_arrays">
+        <item>Teaching</item>
+        <item>Programming</item>
+        <item>Food</item>
+        <item>Gym</item>
+        <item>Car Hire</item>
+        <item>Bike Hire</item>
+        <item>Photography</item>
+        <item>Assignment</item>
+    </string-array>
+    
+</resources>

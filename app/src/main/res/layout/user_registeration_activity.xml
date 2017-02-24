@@ -1,0 +1,135 @@
+<!-- copyrighted content owned by Android Arena (www.androidarena.co.in) -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:background="#e8e8e7"
+            android:orientation="horizontal" >
+
+<!--             <ImageView -->
+<!--                 android:layout_width="wrap_content" -->
+<!--                 android:layout_height="wrap_content" -->
+<!--                 android:layout_marginLeft="10dp" -->
+<!--                 android:background="@drawable/linkedin" /> -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_marginLeft="10dp"
+                android:text="Sign up"
+                android:textColor="#2582C5"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+<!--             <LinearLayout -->
+<!--                 android:layout_width="fill_parent" -->
+<!--                 android:layout_height="48dp" -->
+<!--                 android:gravity="right" -->
+<!--                 android:orientation="horizontal" > -->
+
+<!--                 <ImageView -->
+<!--                     android:layout_width="wrap_content" -->
+<!--                     android:layout_height="wrap_content" -->
+<!--                     android:background="@drawable/select" /> -->
+                
+                
+<!--             </LinearLayout> -->
+            
+            
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="30dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/greybackground"
+            android:orientation="vertical" >
+
+<!--             <ImageView -->
+<!--                 android:layout_width="60dp" -->
+<!--                 android:layout_height="60dp" -->
+<!--                 android:layout_gravity="center_horizontal" -->
+<!--                 android:layout_marginTop="15dp" -->
+<!--                 android:background="@drawable/plan" /> -->
+
+            <EditText
+                android:inputType="text"
+                android:id="@+id/nameId"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="30dp"
+                android:background="#f3f3f3"
+                android:hint="Name"
+                android:paddingLeft="5dp"/>
+
+            <EditText
+                android:inputType="textEmailAddress"
+                android:id="@+id/emailId"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="15dp"
+                android:background="#f3f3f3"
+                android:hint="Email"
+                android:paddingLeft="5dp" />
+
+            <EditText
+                android:inputType="phone"
+                android:id="@+id/mobileId"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="15dp"
+                android:background="#f3f3f3"
+                android:hint="Mobile"
+                android:paddingLeft="5dp" />
+
+<!--             <EditText -->
+<!--                 android:layout_width="fill_parent" -->
+<!--                 android:layout_height="40dp" -->
+<!--                 android:layout_marginTop="15dp" -->
+<!--                 android:background="#f3f3f3" -->
+<!--                 android:hint="address" -->
+<!--                 android:paddingLeft="5dp" /> -->
+
+            <EditText
+                android:id="@+id/skillId"
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="15dp"
+                android:background="#f3f3f3"
+                android:hint="Skills"
+                android:paddingLeft="5dp" />
+
+            <Button
+                android:id="@+id/submitId"
+                android:layout_width="190dp"
+                android:layout_height="38dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/btn"
+                android:text="Submit"
+                android:textColor="#fff" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>
