@@ -31,7 +31,7 @@ public class TaskViewHolder extends RecyclerView.ViewHolder{
 
 				int id = (Integer) likeImageView.getTag();
 				
-				if (!MainActivity.userRegistered()) {
+				if (!MainActivity.isUserRegistered()) {
 					Toast.makeText(MainActivity.getAppContext(), " Please register first.",Toast.LENGTH_SHORT).show();
 					return;
 				} 
@@ -61,7 +61,7 @@ public class TaskViewHolder extends RecyclerView.ViewHolder{
 			@Override
 			public void onClick(View v) {
 
-				if (!MainActivity.userRegistered()) {
+				if (!MainActivity.isUserRegistered()) {
 					Toast.makeText(MainActivity.getAppContext(), " Please register first.",Toast.LENGTH_SHORT).show();
 					return;
 				} 

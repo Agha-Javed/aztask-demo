@@ -14,11 +14,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -27,6 +25,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
@@ -35,15 +34,15 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
-    private static String CLASS_NAME = "MainActivity";
+    private static String TAG = "MainActivity";
     private static Context appContext;
-    private static int USER_ID;
     private static User loggedInUser;
     private static final int FINE_LOCATION_PERMISSION_CONSTANT = 100;
     private static final int FINE_LOCATION_ENABLED_CONSTANT = 101;
-    private SharedPreferences permissionStatus;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private static Location currentUserLocation;
@@ -55,31 +54,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         appContext = getApplicationContext();
+        String deviceId=getDeviceId();
 
-        permissionStatus = getSharedPreferences("permissionStatus", MODE_PRIVATE);
+        Log.i(TAG,"Device Id:"+deviceId);
+        if(deviceId!=null && deviceId.length()>0){
+            loggedInUser= getUserByDeviceId(deviceId);
+            Log.i(TAG,"Found User:"+loggedInUser);
+
+            SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            defaultSharedPreferences.edit().putString(Util.PREF_KEY_DEVICEID,deviceId).apply();
+        }
+
+
         boolean hasPermission = checkPermissions();
+        Log.i(TAG,"has user permission?:"+hasPermission);
 
-
-        // TODO : I have to access device id from device not this harcoded.
-        //"abcd11345"
-
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        defaultSharedPreferences.edit().putString(Util.PREF_KEY_DEVICEID,"abcd11345").apply();
-/*
-        SharedPreferences sharedPreferences = getSharedPreferences(Util.PREF_KEY_DEVICEID, MODE_PRIVATE);
-        sharedPreferences.edit().putString(Util.PREF_KEY_DEVICEID,"abcd11345").apply();
-*/
-
-        loggedInUser=isUserRegistered();
         if (hasPermission) {
             googleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
+            Log.i(TAG,"Proceeding with permission:");
             proceedWithPermission();
         }else{
+            Log.i(TAG,"Proceeding without permission:");
             proceedWithoutPermission();
         }
     }
@@ -90,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (googleApiClient != null) {
             googleApiClient.connect();
-            Log.i("MainActivity", "connecting google api client.");
+            Log.i(TAG, "connecting google api client.");
         }
     }
 
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStop();
 
         if (googleApiClient != null) {
-            Log.i("MainActivity", "Disconnecting google api client.");
+            Log.i(TAG, "Disconnecting google api client.");
             googleApiClient.disconnect();
         }
     }
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Log.i("MainActivity", "Getting User's current location and getting tasks by it.");
+        Log.i(TAG, "Getting User's current location and getting tasks by it.");
 
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
@@ -142,18 +144,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void proceedWithoutPermission() {
-        Log.i("MainActivity", "Getting Default location and getting tasks by it.");
+        Log.i(TAG, "Getting Default location and getting tasks by it.");
         // I WILL MODIFY IT, TO CALL
         proceedWithPermission();
     }
 
-    //TODO THIS METHOD WILL GO TO REGISTERATION ACTIVITY
-    private User isUserRegistered() {
-        String deviceId = Util.getDeviceId();
-
+    private User getUserByDeviceId(String deviceId) {
         try {
             User user = new CheckUserRegisterationWorker().execute(deviceId).get();
-            Log.i(CLASS_NAME, "User is registered:" + user.getDeviceInfo().getDeviceId());
+            Log.i(TAG, "User is registered:" +((user!=null) ?user.getDeviceInfo().getDeviceId() : "No"));
             return user;
         } catch (Exception e) {
             e.printStackTrace();
@@ -166,11 +165,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public static int getUserId() {
-        return loggedInUser.getUserId();
+        return (loggedInUser!=null ) ? loggedInUser.getUserId() : 0;
     }
 
-    public static boolean userRegistered() {
-        return (USER_ID > 0) ? true : false;
+    public static boolean isUserRegistered() {
+        Log.i(TAG,"isUserRegistered::"+((loggedInUser!=null) ? true : false));
+        return (loggedInUser!=null) ? true : false;
     }
 
     public static User getRegisteredUser() {
@@ -207,34 +207,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 return false;
             }
 
-
-
-/*
-            if (permissionStatus.getBoolean(Manifest.permission.ACCESS_FINE_LOCATION, false)) {
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Need Permissions");
-                builder.setMessage("This app needs loocation permission (second check).");
-                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package", getPackageName(), null);
-                        intent.setData(uri);
-                        startActivityForResult(intent, FINE_LOCATION_PERMISSION_CONSTANT);
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
-            }
-*/
-
-
         }
         return true;
     }
@@ -245,9 +217,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == FINE_LOCATION_PERMISSION_CONSTANT) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                SharedPreferences.Editor editor = permissionStatus.edit();
-                editor.putBoolean(Manifest.permission.ACCESS_FINE_LOCATION, true);
-                editor.commit();
 
                 LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
                 boolean gps_enabled = false;
@@ -274,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.i("onActivityResult()", "JAVED:: Request Code:" + requestCode + " , Result Code:" + resultCode + " and Data:" + data);
+        Log.i("TAG", "JAVED:: Request Code:" + requestCode + " , Result Code:" + resultCode + " and Data:" + data);
 
         switch (requestCode) {
             case FINE_LOCATION_PERMISSION_CONSTANT: {
@@ -297,10 +266,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.i("MainActivity", "OnConnected Method");
+        Log.i(TAG, "OnConnected Method");
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(300000);
+        locationRequest.setInterval(10000);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -309,29 +278,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i("MainActivity","onConnectionSuspended Method");
+        Log.i(TAG,"onConnectionSuspended Method");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i("MainActivity","onConnectionFailed Method");
+        Log.i(TAG,"onConnectionFailed Method");
 
     }
 
     @Override
     public void onLocationChanged(Location location) {
         this.currentUserLocation=location;
-        Log.i("MainActivity","JAVED::Location:: Latitude:"+location.getLatitude()+" and Longitude:"+location.getLongitude());
+        Log.i(TAG,"JAVED::Location:: Latitude:"+location.getLatitude()+" and Longitude:"+location.getLongitude());
 
-       // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         String deviceLocation=location.getLatitude()+"|"+location.getLongitude();
-        SharedPreferences sharedPreferences = getSharedPreferences(Util.PREF_KEY_DEVICE_LOCATION, MODE_PRIVATE);
+//        SharedPreferences sharedPreferences = getSharedPreferences(Util.PREF_KEY_DEVICE_LOCATION, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.edit().putString(Util.PREF_KEY_DEVICE_LOCATION,deviceLocation).apply();
 
     }
 
     public static Location getCurrentUserLocation() {
         return currentUserLocation;
+    }
+
+    public static String getDeviceId() {
+
+        final TelephonyManager tm = (TelephonyManager) MainActivity.getAppContext()
+				.getSystemService(Context.TELEPHONY_SERVICE);
+
+		final String tmDevice, tmSerial, androidId;
+		tmDevice = "" + tm.getDeviceId();
+		Log.i(TAG, "Original Device Id:" + tm.getDeviceId());
+
+		tmSerial = "" + tm.getSimSerialNumber();
+		androidId = "" + android.provider.Settings.Secure.getString(MainActivity.getAppContext().getContentResolver(),
+				android.provider.Settings.Secure.ANDROID_ID);
+
+		UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+		String deviceId = deviceUuid.toString();
+
+        return deviceId;
     }
 
 }

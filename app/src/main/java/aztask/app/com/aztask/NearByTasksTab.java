@@ -55,13 +55,8 @@ public class NearByTasksTab extends Fragment{
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				SharedPreferences sharedPreferences = mainActivity.getSharedPreferences(Util.PREF_KEY_DEVICEID, Context.MODE_PRIVATE);
-				String deviceId=sharedPreferences.getString(Util.PREF_KEY_DEVICEID,null);
-
-				Log.i("NearByTasksTab","Device Id:"+deviceId);
-
 				Intent intent=null;
-				if (deviceId!=null && deviceId.length()>0) {
+				if (MainActivity.isUserRegistered()) {
 					intent = new Intent(getContext(), CreateTaskActivity.class);
 				} else {
 					intent = new Intent(getContext(), UserRegisterationActivity.class);
@@ -78,10 +73,15 @@ public class NearByTasksTab extends Fragment{
 			Location location=MainActivity.getCurrentUserLocation();
 			try {
 				if(location==null){
-					taskInfo.put("latitude",""+ MainActivity.getRegisteredUser().getDeviceInfo().getLatitude());
-					taskInfo.put("longitude",""+ MainActivity.getRegisteredUser().getDeviceInfo().getLongitude());
+					Log.i("NearByTasksTab","Location is null, so getting default location.");
+					String latitude=(MainActivity.getRegisteredUser()!=null) ? MainActivity.getRegisteredUser().getDeviceInfo().getLatitude():"";
+					String longitude=(MainActivity.getRegisteredUser()!=null) ? MainActivity.getRegisteredUser().getDeviceInfo().getLongitude():"";
+
+					taskInfo.put("latitude",latitude);
+					taskInfo.put("longitude",longitude);
 					
 				}else{
+					Log.i("NearByTasksTab","Got Location.");
 					taskInfo.put("latitude",""+ location.getLatitude());
 					taskInfo.put("longitude",""+ location.getLongitude());
 				}

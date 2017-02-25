@@ -42,14 +42,15 @@ public class MyTasksTab extends Fragment{
 		View view = inflater.inflate(R.layout.mytasks_fragment, container, false);
 		MyRecyclerView = (RecyclerView) view.findViewById(R.id.mytasks_cardView);
 		MyRecyclerView.setHasFixedSize(true);
-		getTasksList();
+		if(MainActivity.getUserId()>0)
+        getTasksList();
 
 		FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.mytasks_fab);
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
 				Intent intent=null;
-				if (MainActivity.userRegistered()) {
+				if (MainActivity.isUserRegistered()) {
 					intent = new Intent(getContext(), CreateTaskActivity.class);
 				} else {
 					intent = new Intent(getContext(), UserRegisterationActivity.class);
