@@ -14,7 +14,7 @@ import android.util.Log;
 
 public class CheckUserRegisterationWorker extends AsyncTask<String, Void, User> {
 
-	private String CLASS_NAME="CheckUserRegisterationWorker";
+	private String CLASS_NAME="CheckUserRegisteration";
 	
 	@Override
 	protected User doInBackground(String... params) {
