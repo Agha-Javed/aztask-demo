@@ -37,7 +37,12 @@ public class TasksDownloaderWorker extends AsyncTask<String, Void, String> {
 	@Override
 	protected String doInBackground(String... params) {
 		Log.i("CreateTaskWorker", "Downloading tasks.");
-		String link = Util.SERVER_URL + "/tasks/list/nearby";
+		String link ="";
+        if(MainActivity.isUserRegistered())
+            link=Util.SERVER_URL + "/tasks/list/nearby";
+        else
+            link=Util.SERVER_URL + "/tasks/list/new";
+
 		StringBuilder result = new StringBuilder("");
 
 		try {
@@ -51,15 +56,20 @@ public class TasksDownloaderWorker extends AsyncTask<String, Void, String> {
 
 			URL url = new URL(link);
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			con.setDoOutput(true);
 			con.setDoInput(true);
-			con.setRequestProperty("Content-Type", "application/json");
 			con.setRequestProperty("Accept", "application/json");
-			con.setRequestMethod("POST");
 
-			OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-			wr.write(downloadNearbyTasksRequest);
-			wr.flush();
+            if (MainActivity.isUserRegistered()){
+                con.setRequestMethod("POST");
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setDoOutput(true);
+
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(downloadNearbyTasksRequest);
+                wr.flush();
+
+            }
+
 
 			int HttpResult = con.getResponseCode();
 			if (HttpResult == HttpURLConnection.HTTP_OK) {

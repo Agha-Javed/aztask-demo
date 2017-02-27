@@ -28,6 +28,7 @@ public class Util {
 
     public static final String PREF_KEY_DEVICEID = "PREF_KEY_DEVICEID";
     public static final String PREF_KEY_DEVICE_LOCATION = "PREF_KEY_DEVICE_LOCATION";
+    public static final String PREF_KEY_USER = "PREF_KEY_USER";
 
 
     public static String getDeviceId() {
