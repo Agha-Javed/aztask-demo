@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="aztask.app.com.aztask"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0">
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -10,49 +10,57 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-<!--
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
--->
+    <!--
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+        <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+        <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    -->
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <permission android:name="com.app.aztask.permission.C2D_MESSAGE"  android:protectionLevel="signature" />
+
+    <permission
+        android:name="com.app.aztask.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
     <uses-permission android:name="com.app.aztask.permission.C2D_MESSAGE" />
 
 
     <application
+        android:name="android.support.multidex.MultiDexApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name="android.support.multidex.MultiDexApplication">
+        android:theme="@style/AppTheme">
 
 
         <activity
             android:name="aztask.app.com.aztask.ui.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
+
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </activity>
 
 
         <activity
-            android:name="aztask.app.com.aztask.ui.CreateTaskActivity"   android:label="@string/app_name" >
+            android:name="aztask.app.com.aztask.ui.CreateTaskActivity"
+            android:label="@string/app_name">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="aztask.app.com.aztask.ui.MainActivity" />
         </activity>
 
-        <activity android:name="aztask.app.com.aztask.ui.UserRegisterationActivity"  android:label="@string/app_name" >
+        <activity
+            android:name="aztask.app.com.aztask.ui.UserRegisterationActivity"
+            android:label="@string/app_name">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="aztask.app.com.aztask.ui.MainActivity" />
@@ -64,30 +72,45 @@
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="com.app.aztask"/>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.app.aztask" />
             </intent-filter>
         </receiver>
 
-        <service android:name="aztask.app.com.aztask.service.GcmBroadcastReceiver" android:exported="false">
+        <service
+            android:name="aztask.app.com.aztask.service.AZTaskGcmListenerService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
 
-        <service android:name="aztask.app.com.aztask.service.GCMRegistrationIntentService" android:exported="false">
+        <service
+            android:name="aztask.app.com.aztask.service.GCMRegistrationIntentService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID"/>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
 
-        <service android:name="aztask.app.com.aztask.service.TaskAcceptedNotificationService" android:exported="false">
+        <service
+            android:name="aztask.app.com.aztask.service.GCMTokenRefreshListenerService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID"/>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
 
-        <meta-data android:name="com.google.android.gms.version"
+        <service
+            android:name="aztask.app.com.aztask.service.TaskNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
     </application>

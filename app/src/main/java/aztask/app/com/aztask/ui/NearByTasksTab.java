@@ -1,8 +1,10 @@
-package aztask.app.com.aztask;
+package aztask.app.com.aztask.ui;
 
 import java.util.ArrayList;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.net.TasksDownloaderWorker;
 import aztask.app.com.aztask.ui.CreateTaskActivity;

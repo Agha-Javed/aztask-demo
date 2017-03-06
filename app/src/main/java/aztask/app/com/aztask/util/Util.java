@@ -19,7 +19,9 @@ import android.util.Log;
 public class Util {
 
     //public static String SERVER_URL="http://10.1.19.31:9000";
-    public static String SERVER_URL = "http://172.16.0.174:9000";
+    public static String SERVER_URL = "http://172.16.0.103:9000";
+//    public static String SERVER_URL = "http://10.1.106.104:9000";
+
 
     //	public static String SERVER_URL="http://aztask-demo.herokuapp.com";
     public static String PROJECT_NUMBER = "155962838252";
@@ -29,6 +31,11 @@ public class Util {
     public static final String PREF_KEY_DEVICEID = "PREF_KEY_DEVICEID";
     public static final String PREF_KEY_DEVICE_LOCATION = "PREF_KEY_DEVICE_LOCATION";
     public static final String PREF_KEY_USER = "PREF_KEY_USER";
+
+    public static final int NEARBY_TASKS_TAB_POSITION=0;
+    public static final int ASSIGNED_TASKS_TAB_POSITION=1;
+    public static final int MY_TASKS_TAB_POSITION=2;
+
 
 
     public static String getDeviceId() {

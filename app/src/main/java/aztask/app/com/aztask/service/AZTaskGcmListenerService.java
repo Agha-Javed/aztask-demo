@@ -10,18 +10,24 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
-public class GcmBroadcastReceiver extends GcmListenerService{
+public class AZTaskGcmListenerService extends GcmListenerService{
 	
 	//This method will be called on every new message received 
     @Override
     public void onMessageReceived(String from, Bundle data) {
+        String action = data.getString("action");
         String message = data.getString("message");
-        sendNotification(message);
+        String task= data.getString("task");
+        sendNotification(action,message,task);
     }
     
     //This method is generating a notification and displaying the notification 
-    private void sendNotification(String message) {
+    private void sendNotification(String action,String message,String task) {
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("notification", true);
+        intent.putExtra("notification_type", action);
+        intent.putExtra("task", Integer.parseInt(task));
+
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         int requestCode = 0;
         PendingIntent pendingIntent = PendingIntent.getActivity(this, requestCode, intent, PendingIntent.FLAG_ONE_SHOT);

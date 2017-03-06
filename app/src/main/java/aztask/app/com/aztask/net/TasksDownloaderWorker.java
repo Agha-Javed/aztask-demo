@@ -11,7 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import aztask.app.com.aztask.R;
-import aztask.app.com.aztask.TaskAdapter;
+import aztask.app.com.aztask.ui.TaskAdapter;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.ui.MainActivity;
 import aztask.app.com.aztask.util.Util;
@@ -36,7 +36,7 @@ public class TasksDownloaderWorker extends AsyncTask<String, Void, String> {
 
 	@Override
 	protected String doInBackground(String... params) {
-		Log.i("CreateTaskWorker", "Downloading tasks.");
+		Log.i("TasksDownloaderWorker", "Downloading nearby tasks.");
 		String link ="";
         if(MainActivity.isUserRegistered())
             link=Util.SERVER_URL + "/tasks/list/nearby";
@@ -96,9 +96,6 @@ public class TasksDownloaderWorker extends AsyncTask<String, Void, String> {
 	@Override
 	protected void onPostExecute(final String result) {
 		super.onPostExecute(result);
-
-		Log.i("Test", "Got The response::" + result);
-
 		mainActivity.runOnUiThread(new Runnable() {
 			public void run() {
 				JSONArray rootArray;
@@ -111,7 +108,6 @@ public class TasksDownloaderWorker extends AsyncTask<String, Void, String> {
 						item.setTaskId(obj.getString("task_id"));
 						item.setTaskDesc((obj.getString("task_desc")));
 						item.setImageResourceId(R.drawable.great_wall_of_china);
-						Log.i("TaskDownloaderWorker", "The task has been liked."+obj.getString("liked"));
 						item.setIsfav((obj.getString("liked").equalsIgnoreCase("true")) ? 1 :0);
 						item.setIsturned(0);
 						tasksList.add(item);

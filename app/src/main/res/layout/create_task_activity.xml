@@ -30,7 +30,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="40dp"
-                android:background="#f3f3f3"
+                android:background="@drawable/rounded_text_field"
                 android:gravity="top|left"
                 android:hint="Work Description?"
                 android:inputType="textMultiLine"
@@ -41,11 +41,25 @@
                 android:scrollbars="vertical" />
 
             <EditText
-                android:id="@+id/commentsId"
+                android:id="@+id/categoryId"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="45dp"
-                android:background="#f3f3f3"
+                android:background="@drawable/rounded_text_field"
+                android:gravity="top|left"
+                android:hint="What is task category?"
+                android:lines="8"
+                android:maxLines="10"
+                android:minLines="3"
+                android:paddingLeft="5dp"
+                android:scrollbars="vertical" />
+
+            <EditText
+                android:id="@+id/commentsId"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:background="@drawable/rounded_text_field"
                 android:gravity="top|left"
                 android:hint="Comments"
                 android:lines="8"
@@ -54,13 +68,13 @@
                 android:paddingLeft="5dp"
                 android:scrollbars="vertical" />
 
-            <Spinner
+            <!--<Spinner
                 android:id="@+id/categoryId"
                 android:layout_marginTop="50dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:entries="@array/task_categories_arrays"
-                android:hint="Work Category" />
+                android:hint="Work Category" />-->
 
             <Button
                 android:id="@+id/submitId"

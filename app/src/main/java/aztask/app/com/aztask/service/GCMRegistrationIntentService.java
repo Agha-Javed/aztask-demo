@@ -12,12 +12,13 @@ import aztask.app.com.aztask.util.Util;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
+import static aztask.app.com.aztask.util.Util.PROJECT_NUMBER;
+
 
 public class GCMRegistrationIntentService extends IntentService {
     public static final String REGISTRATION_SUCCESS = "RegistrationSuccess";
     public static final String REGISTRATION_ERROR = "RegistrationError";
     public static final String REGISTRATION_TOKEN_SENT = "RegistrationTokenSent";
-    private String PROJECT_NUMBER = "155962838252";
     private String CLASS_NAME="GCMRegistrationIntentService";
 
 
@@ -41,7 +42,7 @@ public class GCMRegistrationIntentService extends IntentService {
         	InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
         	Log.i("GCMRegisterationService", "Got instance "+instanceID);
 
-            token = instanceID.getToken(PROJECT_NUMBER, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            token = instanceID.getToken(Util.PROJECT_NUMBER, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Log.i("GCMRegIntentService", "token:" + token);
 
             sendRegistrationTokenToServer(userId,token);

@@ -1,10 +1,10 @@
 package aztask.app.com.aztask.ui;
 
 import aztask.app.com.aztask.R;
-import aztask.app.com.aztask.TabsAdapter;
 import aztask.app.com.aztask.data.User;
 import aztask.app.com.aztask.net.CheckUserRegisterationWorker;
 import aztask.app.com.aztask.util.Util;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -28,6 +28,7 @@ import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -35,12 +36,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.UUID;
-
-import static android.R.attr.id;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -69,37 +65,59 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.bundle=bundle;
+
+
+        Log.i(TAG, "Bundle:" + bundle);
+        Log.i(TAG, "Extras from Pending Intent:" + getIntent().getExtras());
+
+        if (getIntent().getExtras() != null) {
+            //  Bundle b = getIntent().getExtras();
+            this.bundle = new Bundle();
+            Log.i(TAG, "notification from Pending Intent:" + getIntent().getExtras().getBoolean("notification"));
+            Log.i(TAG, "notification_type from Pending Intent:" + getIntent().getExtras().getString("notification_type"));
+            if (getIntent().getExtras().getBoolean("notification")) {
+                bundle.putString("notification", "true");
+                if ("assigned".equals(getIntent().getExtras().getString("notification_type"))) {
+                    bundle.putString("notification_type", "assigned");
+                } else if ("liked".equals(getIntent().getExtras().getString("notification_type"))) {
+                    bundle.putString("notification_type", "liked");
+                }
+
+                // this is task id which has been either assigned or liked.
+                bundle.putString("task",getIntent().getExtras().getString("task"));
+            }
+
+        }
 
 
         //TODO i have to solve this context issue.
         appContext = getApplicationContext();
 
-        if (canIReadPhoneState()){
+        if (canIReadPhoneState()) {
             // if device id already exists in preferences, then return that back otherwise read device id.
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String deviceId=(preferences.getString(Util.PREF_KEY_DEVICEID,null)!=null) ? preferences.getString(Util.PREF_KEY_DEVICEID,null):getDeviceId();
+            String deviceId = (preferences.getString(Util.PREF_KEY_DEVICEID, null) != null) ? preferences.getString(Util.PREF_KEY_DEVICEID, null) : getDeviceId();
 
-            Log.i(TAG,"Device Id:"+deviceId);
-            if(deviceId!=null && deviceId.length()>0){
+            Log.i(TAG, "Device Id:" + deviceId);
+            if (deviceId != null && deviceId.length() > 0) {
                 preferences.edit().putString(Util.PREF_KEY_DEVICEID, deviceId).apply();
                 setupUser(deviceId);
             }
         }
 
-        if(canIUseLocation()){
-            Log.i(TAG,"Phone has location permission");
-                setupGoogleApiClient();
-                proceedWithPermission();
-        }else{
-            Log.i(TAG,"Phone doesn't has location permission,so will return general tasks.");
+        if (canIUseLocation()) {
+            Log.i(TAG, "Phone has location permission");
+            setupGoogleApiClient();
+            proceedWithPermission();
+        } else {
+            Log.i(TAG, "Phone doesn't has location permission,so will return general tasks.");
             proceedWithoutPermission();
         }
 
     }
 
     private void setupGoogleApiClient() {
-        Log.i(TAG,"Setting up google api client.");
+        Log.i(TAG, "Setting up google api client.");
         googleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -135,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText("NearBy Tasks"));
+        tabLayout.addTab(tabLayout.newTab().setText("Assigned Tasks"));
         tabLayout.addTab(tabLayout.newTab().setText("My Tasks"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
@@ -142,10 +161,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         final TabsAdapter adapter = new TabsAdapter(this, getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+
+        if (bundle != null && "true".equals(bundle.getString("notification"))) {
+            Log.i(TAG, "Bundle:" + bundle + " and Notification: " + bundle.getString("notification"));
+            if (bundle != null && "true".equals(bundle.getString("notification"))) {
+                Log.i(TAG, "Bundle:" + bundle + " and Notification: " + bundle.getString("notification_type"));
+                if ("assigned".equals(bundle.getString("notification_type"))) {
+                    Log.i(TAG, "Setting Assigned Tasks Tab");
+                    viewPager.setCurrentItem(Util.ASSIGNED_TASKS_TAB_POSITION);
+                } else if (bundle != null && "liked".equals(bundle.getString("notification_type"))) {
+                    viewPager.setCurrentItem(Util.MY_TASKS_TAB_POSITION);
+                    Log.i(TAG, "Setting My Tasks tab");
+                }
+                adapter.setArgumentsDataForFragments(bundle);
+            } else {
+                viewPager.setCurrentItem(Util.NEARBY_TASKS_TAB_POSITION);
+                Log.i(TAG, "Setting Default Nearby Tasks.");
+
+            }
+        }
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
+                Log.i(TAG, "Setting Default Nearby Tasks.");
+
             }
 
             @Override
@@ -170,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private User getUserByDeviceId(String deviceId) {
         try {
             User user = new CheckUserRegisterationWorker().execute(deviceId).get();
-            Log.i(TAG, "User is registered:" +((user!=null) ?user.getDeviceInfo().getDeviceId() : "No"));
+            Log.i(TAG, "User is registered:" + ((user != null) ? user.getDeviceInfo().getDeviceId() : "No"));
             return user;
         } catch (Exception e) {
             e.printStackTrace();
@@ -183,12 +224,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public static int getUserId() {
-        return (loggedInUser!=null ) ? loggedInUser.getUserId() : 0;
+        return (loggedInUser != null) ? loggedInUser.getUserId() : 0;
     }
 
     public static boolean isUserRegistered() {
-        Log.i(TAG,"isUserRegistered::"+((loggedInUser!=null) ? true : false));
-        return (loggedInUser!=null) ? true : false;
+        Log.i(TAG, "isUserRegistered::" + ((loggedInUser != null) ? true : false));
+        return (loggedInUser != null) ? true : false;
     }
 
     public static User getRegisteredUser() {
@@ -244,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (requestCode == READ_PHONE_STATE_PERMISSION_CONSTANT) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                String deviceId=getDeviceId();
+                String deviceId = getDeviceId();
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
                 preferences.edit().putString(Util.PREF_KEY_DEVICEID, deviceId).apply();
                 setupUser(deviceId);
@@ -285,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.i(TAG, "OnConnected Method");
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(100000);
+        locationRequest.setInterval(1000000);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -294,23 +335,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i(TAG,"onConnectionSuspended Method");
+        Log.i(TAG, "onConnectionSuspended Method");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i(TAG,"onConnectionFailed Method");
+        Log.i(TAG, "onConnectionFailed Method");
 
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        this.currentUserLocation=location;
-        Log.i(TAG,"JAVED::Location:: Latitude:"+location.getLatitude()+" and Longitude:"+location.getLongitude());
+        this.currentUserLocation = location;
+        Log.i(TAG, "JAVED::Location:: Latitude:" + location.getLatitude() + " and Longitude:" + location.getLongitude());
 
-        String deviceLocation=location.getLatitude()+"|"+location.getLongitude();
+        String deviceLocation = location.getLatitude() + "|" + location.getLongitude();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.edit().putString(Util.PREF_KEY_DEVICE_LOCATION,deviceLocation).apply();
+        sharedPreferences.edit().putString(Util.PREF_KEY_DEVICE_LOCATION, deviceLocation).apply();
 
     }
 
@@ -322,18 +363,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static String getDeviceId() {
 
         final TelephonyManager tm = (TelephonyManager) MainActivity.getAppContext()
-				.getSystemService(Context.TELEPHONY_SERVICE);
+                .getSystemService(Context.TELEPHONY_SERVICE);
 
-		final String tmDevice, tmSerial, androidId;
-		tmDevice = "" + tm.getDeviceId();
-		Log.i(TAG, "Original Device Id:" + tm.getDeviceId());
+        final String tmDevice, tmSerial, androidId;
+        tmDevice = "" + tm.getDeviceId();
+        Log.i(TAG, "Original Device Id:" + tm.getDeviceId());
 
-		tmSerial = "" + tm.getSimSerialNumber();
-		androidId = "" + android.provider.Settings.Secure.getString(MainActivity.getAppContext().getContentResolver(),
-				android.provider.Settings.Secure.ANDROID_ID);
+        tmSerial = "" + tm.getSimSerialNumber();
+        androidId = "" + android.provider.Settings.Secure.getString(MainActivity.getAppContext().getContentResolver(),
+                android.provider.Settings.Secure.ANDROID_ID);
 
-		UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-		String deviceId = deviceUuid.toString();
+        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
+        String deviceId = deviceUuid.toString();
 
         return deviceId;
     }
@@ -376,9 +417,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         } else {
             Log.i(TAG, "User doesn't exist in preferences, getting it from server and will save into preferences");
             loggedInUser = getUserByDeviceId(deviceId);
-            String userInJSONForm=gson.toJson(loggedInUser);
+            String userInJSONForm = gson.toJson(loggedInUser);
             preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm);
         }
-        Log.i(TAG, "User :"+loggedInUser+" got setup against this id:" + deviceId);
+        Log.i(TAG, "User :" + loggedInUser + " got setup against this id:" + deviceId);
     }
 }

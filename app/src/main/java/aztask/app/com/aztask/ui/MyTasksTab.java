@@ -1,7 +1,10 @@
-package aztask.app.com.aztask;
+package aztask.app.com.aztask.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.net.MyTasksDownloadWorker;
 import aztask.app.com.aztask.ui.CreateTaskActivity;
@@ -24,6 +27,7 @@ public class MyTasksTab extends Fragment{
 	ArrayList<TaskCard> tasksList = new ArrayList<TaskCard>();
 	RecyclerView MyRecyclerView;
 	AppCompatActivity mainActivity;
+
 
     public MyTasksTab(){}
 
@@ -76,7 +80,8 @@ public class MyTasksTab extends Fragment{
 //			} catch (JSONException e) {
 //				e.printStackTrace();
 //			}
-			new MyTasksDownloadWorker(mainActivity,MyRecyclerView).execute();
+			//new MyTasksDownloadWorker(mainActivity,MyRecyclerView).execute();
+			new MyTasksDownloadWorker(mainActivity,this,MyRecyclerView).execute();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
