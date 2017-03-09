@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import aztask.app.com.aztask.R;
+import aztask.app.com.aztask.ui.CustomLinearLayoutManagerWithSmoothScroller;
 import aztask.app.com.aztask.ui.TaskAdapter;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.ui.MainActivity;
@@ -153,11 +154,11 @@ public class MyTasksDownloadWorker extends AsyncTask<Void, Void, String>{
              //   MyRecyclerView.getLayoutManager().smoothScrollToPosition(MyRecyclerView,null,5);
     //            layoutManager.smoothScrollToPosition(MyRecyclerView,null,5);
 
-                 MyRecyclerView.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(MainActivity.getAppContext()));
+                 MyRecyclerView.setLayoutManager(new CustomLinearLayoutManagerWithSmoothScroller(MainActivity.getAppContext()));
              //    MyRecyclerView.smoothScrollToPosition(5);
                 ((LinearLayoutManager) MyRecyclerView.getLayoutManager()).scrollToPositionWithOffset(5, 0);
 
-                //MyRecyclerView.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(MainActivity.getAppContext()));
+                //MyRecyclerView.setLayoutManager(new CustomLinearLayoutManagerWithSmoothScroller(MainActivity.getAppContext()));
                 //MyRecyclerView.smoothScrollToPosition(5);
              //   MyRecyclerView.smoothScrollToPosition(5);
               /*  if(fragmentRef.getArguments()!=null && "true".equals(fragmentRef.getArguments().getString("notification")) && fragmentRef.getArguments().getInt("task")>0 && positions.containsKey(fragmentRef.getArguments().getInt("task"))){
@@ -170,40 +171,4 @@ public class MyTasksDownloadWorker extends AsyncTask<Void, Void, String>{
 	}
 
 
-    public class LinearLayoutManagerWithSmoothScroller extends LinearLayoutManager {
-
-        public LinearLayoutManagerWithSmoothScroller(Context context) {
-            super(context, VERTICAL, false);
-        }
-
-        public LinearLayoutManagerWithSmoothScroller(Context context, int orientation, boolean reverseLayout) {
-            super(context, orientation, reverseLayout);
-        }
-
-        @Override
-        public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state,
-                                           int position) {
-            RecyclerView.SmoothScroller smoothScroller = new TopSnappedSmoothScroller(recyclerView.getContext());
-            smoothScroller.setTargetPosition(position);
-            startSmoothScroll(smoothScroller);
-        }
-
-        private class TopSnappedSmoothScroller extends LinearSmoothScroller {
-            public TopSnappedSmoothScroller(Context context) {
-                super(context);
-
-            }
-
-            @Override
-            public PointF computeScrollVectorForPosition(int targetPosition) {
-                return LinearLayoutManagerWithSmoothScroller.this
-                        .computeScrollVectorForPosition(targetPosition);
-            }
-
-            @Override
-            protected int getVerticalSnapPreference() {
-                return SNAP_TO_START;
-            }
-        }
-    }
 }

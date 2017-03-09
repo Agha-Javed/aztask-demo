@@ -1,27 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/assigned_tasks_cardView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="bottom|start"
-        android:orientation="horizontal" >
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/assigned_tasks_cardView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/tv_error_message_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="sans-serif"
+            android:padding="16dp"
+            android:text="unable to connect with server,please check internet connection."
+            android:textSize="16sp"
+            android:visibility="invisible" />
+
+        <ProgressBar
+            android:id="@+id/pb_loading_indicator"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:visibility="invisible" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/assigned_tasks_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/fab_margin"
-            android:gravity="bottom|center"
+            android:layout_gravity="bottom|left"
             android:src="@android:drawable/ic_input_add" />
-    </LinearLayout>
 
-</RelativeLayout>
+    </FrameLayout>
+
+</LinearLayout>

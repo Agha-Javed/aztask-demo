@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (bundle != null && "true".equals(bundle.getString("notification"))) {
             Log.i(TAG, "Bundle:" + bundle + " and Notification: " + bundle.getString("notification"));
             if (bundle != null && "true".equals(bundle.getString("notification"))) {
-                Log.i(TAG, "Bundle:" + bundle + " and Notification: " + bundle.getString("notification_type"));
+                Log.i(TAG, "Bundle:" + bundle + " and Notification Type: " + bundle.getString("notification_type"));
                 if ("assigned".equals(bundle.getString("notification_type"))) {
                     Log.i(TAG, "Setting Assigned Tasks Tab");
                     viewPager.setCurrentItem(Util.ASSIGNED_TASKS_TAB_POSITION);
@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             Log.i(TAG, "User doesn't exist in preferences, getting it from server and will save into preferences");
             loggedInUser = getUserByDeviceId(deviceId);
             String userInJSONForm = gson.toJson(loggedInUser);
-            preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm);
+            preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
         }
         Log.i(TAG, "User :" + loggedInUser + " got setup against this id:" + deviceId);
     }

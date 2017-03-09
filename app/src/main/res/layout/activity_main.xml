@@ -25,7 +25,9 @@
         android:background="?attr/colorPrimary"
         android:elevation="6dp"
         android:minHeight="?attr/actionBarSize"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:tabPaddingStart="-1dp"
+        app:tabPaddingEnd="-1dp"/>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"

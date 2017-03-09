@@ -22,7 +22,7 @@ public class TabsAdapter extends FragmentPagerAdapter{
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                NearByTasksTab tab0 = new NearByTasksTab(mainActivity);
+                NearByTasksTab tab0 = new NearByTasksTab();
                 return tab0;
             case 1:
                 AssignedTaskTab tab1 = new AssignedTaskTab();
@@ -31,7 +31,7 @@ public class TabsAdapter extends FragmentPagerAdapter{
                 }
                 return tab1;
             case 2:
-                MyTasksTab tab2 = new MyTasksTab(mainActivity);
+                MyTasksTab tab2 = new MyTasksTab();
                 if(tab2!=null){
                     tab2.setArguments(bundle);
                 }

@@ -26,7 +26,7 @@ public class AZTaskGcmListenerService extends GcmListenerService{
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("notification", true);
         intent.putExtra("notification_type", action);
-        intent.putExtra("task", Integer.parseInt(task));
+        intent.putExtra("task",task);
 
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         int requestCode = 0;
