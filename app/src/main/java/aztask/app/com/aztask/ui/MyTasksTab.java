@@ -191,8 +191,6 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
             mErrorMessageDisplay.setVisibility(View.INVISIBLE);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
 
-
-/*
             Log.i(TAG,"Bundle Arguments:"+getArguments());
             if(getArguments()!=null && "true".equals(getArguments().getString("notification")) && getArguments().getString("task")!=null){
                 int taskId=Integer.parseInt(getArguments().getString("task"));
@@ -201,7 +199,6 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                     ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(positions.get(taskId), 0);
                 }
             }
-*/
         }else{
             recyclerView.setVisibility(View.INVISIBLE);
             mErrorMessageDisplay.setVisibility(View.VISIBLE);
@@ -209,14 +206,7 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
             fab.setVisibility(View.INVISIBLE);
         }
 
-
-/*
-        MyRecyclerView.setLayoutManager(new MyTasksDownloadWorker.CustomLinearLayoutManagerWithSmoothScroller(MainActivity.getAppContext()));
-        //    MyRecyclerView.smoothScrollToPosition(5);
-        ((LinearLayoutManager) MyRecyclerView.getLayoutManager()).scrollToPositionWithOffset(5, 0);
-*/
-
-    }
+   }
 
     @Override
     public void onLoaderReset(Loader<String> loader) {
