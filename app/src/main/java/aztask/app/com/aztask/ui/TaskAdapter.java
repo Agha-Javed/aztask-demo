@@ -41,6 +41,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.coverImageView.setTag(list.get(position).getImageResourceId());
         holder.likeImageView.setTag((list.get(position).getIsfav() > 0) ? R.drawable.ic_liked : R.drawable.ic_like);
         holder.likeImageView.setImageResource((list.get(position).getIsfav() > 0) ? R.drawable.ic_liked : R.drawable.ic_like);
+
+        holder.itemView.setTag(list.get(position).getTaskId());
     }
 
     @Override

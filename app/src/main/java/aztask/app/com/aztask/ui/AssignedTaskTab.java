@@ -2,6 +2,8 @@ package aztask.app.com.aztask.ui;
 
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -10,6 +12,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +37,7 @@ import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.util.Util;
 
+import static android.R.attr.id;
 import static android.R.id.list;
 import static java.lang.Integer.parseInt;
 
@@ -87,6 +91,28 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
+
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            // Called when a user swipes left or right on a ViewHolder
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                // Here is where you'll implement swipe to delete
+
+                // COMPLETED (1) Construct the URI for the item to delete
+                //[Hint] Use getTag (from the adapter code) to get the id of the swiped item
+                // Retrieve the id of the task to delete
+                String taskId =(String)viewHolder.itemView.getTag();
+
+                new UnAssignTaskWorker().execute(taskId);
+
+            }
+        }).attachToRecyclerView(mRecyclerView);
 
         mErrorMessageDisplay = (TextView) view.findViewById(R.id.tv_error_message_display);
         mLoadingIndicator = (ProgressBar) view.findViewById(R.id.pb_loading_indicator);
@@ -209,4 +235,66 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
 
     }
 
+    class UnAssignTaskWorker extends AsyncTask<String, Void, String> {
+
+        String TAG = "MyTasksTab.UnAssignTaskWorker";
+
+        @Override
+        protected String doInBackground(String... params) {
+            Log.i(TAG, "Deleting Task.");
+
+            try {
+                String taskId = params[0];
+                Log.i(TAG,"Task Id:"+taskId);
+                if ((taskId==null || taskId.length()<=0)) {
+                    return "{\"code\":\"400\",\"message\":\"Invalid Task Id\"}";
+                }
+                Log.i(TAG, "Task to delete:" + taskId);
+
+                String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/task/" + taskId + "/unassign_task";
+                Log.d(TAG, "Link:" + link);
+
+                URL url = new URL(link);
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con.setDoInput(true);
+                con.setRequestProperty("Accept", "application/json");
+
+                StringBuilder sb = new StringBuilder("");
+                int HttpResult = con.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    String result = sb.toString();
+                    Log.i(TAG, "Task Deletion Response:" + result);
+                    return result;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return "{\"code\":\"400\",\"message\":\"Invalid Task Id\"}";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            JSONObject responseObj = null;
+            int responseCode = 0;
+            try {
+                responseObj = new JSONObject(result);
+                responseCode = (responseObj.getInt("code") > 0) ? 200 : 400;
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if (responseCode == 200) {
+                Toast.makeText(getContext(), "This task has been deleted.", Toast.LENGTH_LONG).show();
+                getLoaderManager().restartLoader(ASSIGNED_TASKS_LOADER_ID, null, AssignedTaskTab.this).forceLoad();
+            }
+        }
+    }
 }
