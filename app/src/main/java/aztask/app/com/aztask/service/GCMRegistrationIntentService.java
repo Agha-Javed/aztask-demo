@@ -2,6 +2,8 @@ package aztask.app.com.aztask.service;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -19,7 +21,7 @@ public class GCMRegistrationIntentService extends IntentService {
     public static final String REGISTRATION_SUCCESS = "RegistrationSuccess";
     public static final String REGISTRATION_ERROR = "RegistrationError";
     public static final String REGISTRATION_TOKEN_SENT = "RegistrationTokenSent";
-    private String CLASS_NAME="GCMRegistrationIntentService";
+    private String CLASS_NAME="GCMRegistrationService";
 
 
     public GCMRegistrationIntentService() {
@@ -44,6 +46,9 @@ public class GCMRegistrationIntentService extends IntentService {
 
             token = instanceID.getToken(Util.PROJECT_NUMBER, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Log.i("GCMRegIntentService", "token:" + token);
+
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+			preferences.edit().putString(Util.PREF_GCM_TOKEN, token).apply();
 
             sendRegistrationTokenToServer(userId,token);
         } catch (Exception e) {

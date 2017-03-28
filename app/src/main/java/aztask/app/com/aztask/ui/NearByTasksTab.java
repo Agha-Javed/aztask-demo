@@ -38,7 +38,6 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import static android.R.id.list;
 
 public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCallbacks<String> {
 
@@ -88,10 +87,6 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
 
-
-       // taskAdapter = new TaskAdapter();
-        //recyclerView.setAdapter(taskAdapter);
-
         mErrorMessageDisplay = (TextView) view.findViewById(R.id.tv_error_message_display);
 
         mLoadingIndicator = (ProgressBar) view.findViewById(R.id.pb_loading_indicator);
@@ -110,24 +105,9 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
     private String getRequest() {
         try {
             final JSONObject taskInfo = new JSONObject();
-            Location location = MainActivity.getCurrentUserLocation();
-            try {
-                if (location == null) {
-                    Log.i("NearByTasksTab", "Location is null, so getting default location.");
-                    String latitude = (MainActivity.getRegisteredUser() != null) ? MainActivity.getRegisteredUser().getDeviceInfo().getLatitude() : "";
-                    String longitude = (MainActivity.getRegisteredUser() != null) ? MainActivity.getRegisteredUser().getDeviceInfo().getLongitude() : "";
-
-                    taskInfo.put("latitude", latitude);
-                    taskInfo.put("longitude", longitude);
-
-                } else {
-                    Log.i("NearByTasksTab", "Got Location.");
-                    taskInfo.put("latitude", "" + location.getLatitude());
-                    taskInfo.put("longitude", "" + location.getLongitude());
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            Location location = Util.getDeviceLocation();
+            taskInfo.put("latitude", "" + location.getLatitude());
+            taskInfo.put("longitude", "" + location.getLongitude());
             taskInfo.put("userId", MainActivity.getUserId());
             return taskInfo.toString();
         } catch (Exception e) {

@@ -51,7 +51,7 @@ public class AZTaskGcmListenerService extends GcmListenerService {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if ("assigned".equals(action)) {
+        if ("assigned".equalsIgnoreCase(data.getString("action"))) {
             Log.i("GcmListenerService","setting unassigned action");
             noBuilder.addAction(ignoreAction(this));
             notificationManager.notify(BROADCAST_NO_ACTION_CODE, noBuilder.build()); //0 = ID of notification

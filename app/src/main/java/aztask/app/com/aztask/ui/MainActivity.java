@@ -3,6 +3,7 @@ package aztask.app.com.aztask.ui;
 import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.User;
 import aztask.app.com.aztask.net.CheckUserRegisterationWorker;
+import aztask.app.com.aztask.service.GCMRegistrationIntentService;
 import aztask.app.com.aztask.util.Util;
 
 import android.Manifest;
@@ -20,12 +21,12 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,6 +38,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 
 import java.util.UUID;
+
+import static android.app.Activity.RESULT_OK;
+import static aztask.app.com.aztask.util.Util.getDeviceId;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -84,26 +88,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
 
                 // this is task id which has been either assigned or liked.
-                bundle.putString("task",getIntent().getExtras().getString("task"));
+                bundle.putString("task", getIntent().getExtras().getString("task"));
             }
 
         }
 
+        loadUser();
 
-        //TODO i have to solve this context issue.
         appContext = getApplicationContext();
-
-        if (canIReadPhoneState()) {
-            // if device id already exists in preferences, then return that back otherwise read device id.
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            String deviceId = (preferences.getString(Util.PREF_KEY_DEVICEID, null) != null) ? preferences.getString(Util.PREF_KEY_DEVICEID, null) : getDeviceId();
-
-            Log.i(TAG, "Device Id:" + deviceId);
-            if (deviceId != null && deviceId.length() > 0) {
-                preferences.edit().putString(Util.PREF_KEY_DEVICEID, deviceId).apply();
-                setupUser(deviceId);
-            }
-        }
 
         if (canIUseLocation()) {
             Log.i(TAG, "Phone has location permission");
@@ -128,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onStart() {
         super.onStart();
-
         if (googleApiClient != null) {
             googleApiClient.connect();
             Log.i(TAG, "connecting google api client.");
@@ -283,14 +274,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
 
-        if (requestCode == READ_PHONE_STATE_PERMISSION_CONSTANT) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                String deviceId = getDeviceId();
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-                preferences.edit().putString(Util.PREF_KEY_DEVICEID, deviceId).apply();
-                setupUser(deviceId);
-            }
-        }
 
     }
 
@@ -347,89 +330,55 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onLocationChanged(Location location) {
         this.currentUserLocation = location;
-        Log.i(TAG, "JAVED::Location:: Latitude:" + location.getLatitude() + " and Longitude:" + location.getLongitude());
+        Log.i(TAG, "Location Changed::Latitude:" + location.getLatitude() + " and Longitude:" + location.getLongitude());
 
-        String deviceLocation = location.getLatitude() + "|" + location.getLongitude();
+        String deviceLocation = location.getLatitude() + ":" + location.getLongitude();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.edit().putString(Util.PREF_KEY_DEVICE_LOCATION, deviceLocation).apply();
-
+        sharedPreferences.edit().putString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, deviceLocation).apply();
+        Snackbar.make(findViewById(R.id.tab_layout),"Location Changed:"+deviceLocation,Snackbar.LENGTH_LONG).show();
     }
-
-    //TODO I HAVE TO FIX IT.
-    public static Location getCurrentUserLocation() {
-        return currentUserLocation;
-    }
-
-    public static String getDeviceId() {
-
-        final TelephonyManager tm = (TelephonyManager) MainActivity.getAppContext()
-                .getSystemService(Context.TELEPHONY_SERVICE);
-
-        final String tmDevice, tmSerial, androidId;
-        tmDevice = "" + tm.getDeviceId();
-        Log.i(TAG, "Original Device Id:" + tm.getDeviceId());
-
-        tmSerial = "" + tm.getSimSerialNumber();
-        androidId = "" + android.provider.Settings.Secure.getString(MainActivity.getAppContext().getContentResolver(),
-                android.provider.Settings.Secure.ANDROID_ID);
-
-        UUID deviceUuid = new UUID(androidId.hashCode(), ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-        String deviceId = deviceUuid.toString();
-
-        return deviceId;
-    }
-
-    private boolean canIReadPhoneState() {
-
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE_PERMISSION_CONSTANT);
-            return false;
-        }
-        return true;
-    }
-
 
     private boolean canIUseLocation() {
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_CONSTANT);
             return false;
-
-/*
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_CONSTANT);
-                return false;
-            } else{
-                return false;
-            }
-*/
         }
         return true;
     }
 
-    private void setupUser(String deviceId) {
+    private void loadUser() {
+
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String userRefInJSONForm = preferences.getString(Util.PREF_KEY_USER, null);
         Gson gson = new Gson();
-        if (userRefInJSONForm != null) {
-            Log.i(TAG, "User exists in preferences, parsing it.");
-            loggedInUser = gson.fromJson(userRefInJSONForm, User.class);
+
+        if (preferences.getString(Util.PREF_KEY_DEVICEID, null) != null) {
+            String userRefInJSONForm = preferences.getString(Util.PREF_KEY_USER, null);
+            if (userRefInJSONForm != null) {
+                Log.i(TAG, "User exists in preferences, parsing it.");
+                loggedInUser = gson.fromJson(userRefInJSONForm, User.class);
+            } else {
+                Log.i(TAG, "User doesn't exist in preferences, getting it from server and will save into preferences");
+                String deviceId = preferences.getString(Util.PREF_KEY_DEVICEID, null);
+                loggedInUser = getUserByDeviceId(deviceId);
+                String userInJSONForm = gson.toJson(loggedInUser);
+                preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
+            }
         } else {
-            Log.i(TAG, "User doesn't exist in preferences, getting it from server and will save into preferences");
+            String deviceId = Util.getDeviceId();
             loggedInUser = getUserByDeviceId(deviceId);
-            String userInJSONForm = gson.toJson(loggedInUser);
-            preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
+            if (loggedInUser != null) {
+                String userInJSONForm = gson.toJson(loggedInUser);
+                preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
+            }
         }
-        Log.i(TAG, "User :" + loggedInUser + " got setup against this id:" + deviceId);
+
+        if(loggedInUser!=null && preferences.getString(Util.PREF_GCM_TOKEN,null)==null){
+            Intent itent = new Intent(getApplicationContext(), GCMRegistrationIntentService.class);
+            itent.putExtra("userId", loggedInUser.getUserId());
+            startService(itent);
+        }
+
+        Log.i(TAG, "Logged In User :" + loggedInUser);
     }
 
-    @Override
-    public void onBackPressed() {
-        // make sure you have this outcommented
-        // super.onBackPressed();
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
 }
