@@ -30,4 +30,6 @@
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <style name="NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+    </style>
 </resources>

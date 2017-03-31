@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
     private List<TaskCard> list;
 
@@ -57,14 +58,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView titleTextView;
         ImageView coverImageView;
         ImageView likeImageView;
-        ImageView shareImageView;
+       // ImageView shareImageView;
 
         TaskViewHolder(View v) {
             super(v);
             titleTextView = (TextView) v.findViewById(R.id.titleTextView);
             coverImageView = (ImageView) v.findViewById(R.id.coverImageView);
             likeImageView = (ImageView) v.findViewById(R.id.likeImageView);
-            shareImageView = (ImageView) v.findViewById(R.id.shareImageView);
+           // shareImageView = (ImageView) v.findViewById(shareImageView);
 
             likeImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -103,7 +104,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 }
             });
 
-            shareImageView.setOnClickListener(new View.OnClickListener() {
+            /*shareImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
@@ -124,7 +125,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     MainActivity.getAppContext().startActivity(Intent.createChooser(shareIntent, MainActivity.getAppContext().getResources().getText(R.string.send_to)));
 
                 }
-            });
+            });*/
 
         }
     }

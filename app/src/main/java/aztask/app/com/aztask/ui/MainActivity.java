@@ -37,11 +37,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
 
-import java.util.UUID;
-
-import static android.app.Activity.RESULT_OK;
-import static aztask.app.com.aztask.util.Util.getDeviceId;
-
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     // FINAL STATIC VARIABLES
@@ -70,6 +65,40 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
+
+
+        tabLayout.addTab(tabLayout.newTab().setText("NearBy Tasks"));
+        tabLayout.addTab(tabLayout.newTab().setText("Assigned Tasks"));
+        tabLayout.addTab(tabLayout.newTab().setText("My Tasks"));
+        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+                Log.i(TAG, "Setting Default Nearby Tasks.");
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+        final TabsAdapter adapter = new TabsAdapter(this, getSupportFragmentManager(), tabLayout.getTabCount());
+        viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        viewPager.setCurrentItem(Util.NEARBY_TASKS_TAB_POSITION);
 
         Log.i(TAG, "Bundle:" + bundle);
         Log.i(TAG, "Extras from Pending Intent:" + getIntent().getExtras());
@@ -83,27 +112,51 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 bundle.putString("notification", "true");
                 if ("assigned".equals(getIntent().getExtras().getString("notification_type"))) {
                     bundle.putString("notification_type", "assigned");
+                    Log.i(TAG, "Setting Assigned Tasks Tab");
+                    viewPager.setCurrentItem(Util.ASSIGNED_TASKS_TAB_POSITION);
                 } else if ("liked".equals(getIntent().getExtras().getString("notification_type"))) {
                     bundle.putString("notification_type", "liked");
+                    Log.i(TAG, "Setting My Tasks tab");
+                    viewPager.setCurrentItem(Util.MY_TASKS_TAB_POSITION);
                 }
-
-                // this is task id which has been either assigned or liked.
                 bundle.putString("task", getIntent().getExtras().getString("task"));
+                adapter.setArgumentsDataForFragments(bundle);
             }
 
         }
+
+/*
+        if (bundle != null && "true".equals(bundle.getString("notification"))) {
+            Log.i(TAG, "Bundle:" + bundle + " and Notification: " + bundle.getString("notification"));
+            if (bundle != null && "true".equals(bundle.getString("notification"))) {
+                Log.i(TAG, "Bundle:" + bundle + " and Notification Type: " + bundle.getString("notification_type"));
+                if ("assigned".equals(bundle.getString("notification_type"))) {
+                    Log.i(TAG, "Setting Assigned Tasks Tab");
+                    viewPager.setCurrentItem(Util.ASSIGNED_TASKS_TAB_POSITION);
+                } else if (bundle != null && "liked".equals(bundle.getString("notification_type"))) {
+                    viewPager.setCurrentItem(Util.MY_TASKS_TAB_POSITION);
+                    Log.i(TAG, "Setting My Tasks tab");
+                }
+                adapter.setArgumentsDataForFragments(bundle);
+            } else {
+                viewPager.setCurrentItem(Util.NEARBY_TASKS_TAB_POSITION);
+                Log.i(TAG, "Setting Default Nearby Tasks.");
+
+            }
+        }
+*/
 
         loadUser();
 
         appContext = getApplicationContext();
 
-        if (canIUseLocation()) {
+        if (checkLocationPermission()) {
             Log.i(TAG, "Phone has location permission");
             setupGoogleApiClient();
-            proceedWithPermission();
+            //    proceedWithPermission();
         } else {
             Log.i(TAG, "Phone doesn't has location permission,so will return general tasks.");
-            proceedWithoutPermission();
+            //  proceedWithoutPermission();
         }
 
     }
@@ -193,12 +246,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    private void proceedWithoutPermission() {
-        Log.i(TAG, "Getting Default location and getting tasks by it.");
-        // I WILL MODIFY IT, TO CALL
-        proceedWithPermission();
-    }
-
     private User getUserByDeviceId(String deviceId) {
         try {
             User user = new CheckUserRegisterationWorker().execute(deviceId).get();
@@ -228,81 +275,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-    public void enableLocation() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Your Location seems to be disabled, please enable it to get tasks nearby you.")
-                .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        startActivityForResult(intent, FINE_LOCATION_ENABLED_CONSTANT);
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        dialog.cancel();
-                    }
-                });
-        final AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == FINE_LOCATION_PERMISSION_CONSTANT) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupGoogleApiClient();
-                LocationManager lm = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-                boolean gps_enabled = false;
-                try {
-                    if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                        proceedWithPermission();
-                    } else {
-                        enableLocation();
-                        proceedWithoutPermission();
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            } else {
-                Toast.makeText(getBaseContext(), "User denied for permission, getting defualt tasks", Toast.LENGTH_LONG).show();
-                proceedWithoutPermission();
-            }
-        }
-
-
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        super.onActivityResult(requestCode, resultCode, data);
-
-        Log.i("TAG", "JAVED:: Request Code:" + requestCode + " , Result Code:" + resultCode + " and Data:" + data);
-
-        switch (requestCode) {
-            case FINE_LOCATION_PERMISSION_CONSTANT: {
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    proceedWithPermission();
-                }
-            }
-
-            case FINE_LOCATION_ENABLED_CONSTANT: {
-                if (resultCode == RESULT_OK) {
-                    proceedWithPermission();
-                }
-
-            }
-
-        }
-
-
-    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -335,10 +307,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String deviceLocation = location.getLatitude() + ":" + location.getLongitude();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.edit().putString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, deviceLocation).apply();
-        Snackbar.make(findViewById(R.id.tab_layout),"Location Changed:"+deviceLocation,Snackbar.LENGTH_LONG).show();
     }
 
-    private boolean canIUseLocation() {
+    private boolean checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_CONSTANT);
             return false;
@@ -372,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
 
-        if(loggedInUser!=null && preferences.getString(Util.PREF_GCM_TOKEN,null)==null){
+        if (loggedInUser != null && preferences.getString(Util.PREF_GCM_TOKEN, null) == null) {
             Intent itent = new Intent(getApplicationContext(), GCMRegistrationIntentService.class);
             itent.putExtra("userId", loggedInUser.getUserId());
             startService(itent);
@@ -381,4 +352,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.i(TAG, "Logged In User :" + loggedInUser);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_HOME);
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(homeIntent);
+    }
 }
