@@ -16,11 +16,11 @@ import android.util.Log;
 public class Util {
 
     //public static String SERVER_URL="http://10.1.19.31:9000";
-    public static String SERVER_URL = "http://192.168.0.120:9000";
+   // public static String SERVER_URL = "http://192.168.0.120:9000";
 //    public static String SERVER_URL = "http://10.1.106.104:9000";
 
 
-    //public static String SERVER_URL="http://aztask-demo.herokuapp.com";
+    public static String SERVER_URL="http://aztask-demo.herokuapp.com";
     public static String PROJECT_NUMBER = "155962838252";
     public static final String REGISTRATION_SUCCESS = "RegistrationSuccess";
     public static final String REGISTRATION_ERROR = "RegistrationError";
