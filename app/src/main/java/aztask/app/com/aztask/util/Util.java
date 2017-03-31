@@ -16,11 +16,11 @@ import android.util.Log;
 public class Util {
 
     //public static String SERVER_URL="http://10.1.19.31:9000";
-    //public static String SERVER_URL = "http://172.16.1.203:9000";
+    public static String SERVER_URL = "http://192.168.0.120:9000";
 //    public static String SERVER_URL = "http://10.1.106.104:9000";
 
 
-    public static String SERVER_URL="http://aztask-demo.herokuapp.com";
+    //public static String SERVER_URL="http://aztask-demo.herokuapp.com";
     public static String PROJECT_NUMBER = "155962838252";
     public static final String REGISTRATION_SUCCESS = "RegistrationSuccess";
     public static final String REGISTRATION_ERROR = "RegistrationError";
@@ -42,7 +42,7 @@ public class Util {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getAppContext());
         String deviceId = "";
-        if (sharedPreferences.getString(Util.PREF_KEY_DEVICEID, null) != null) {
+        if (sharedPreferences.getString(Util.PREF_KEY_DEVICEID, "") != null && sharedPreferences.getString(Util.PREF_KEY_DEVICEID, "").length()>0) {
             deviceId = sharedPreferences.getString(Util.PREF_KEY_DEVICEID, "");
         } else {
             String androidId = android.provider.Settings.Secure.getString(MainActivity.getAppContext().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
@@ -57,7 +57,7 @@ public class Util {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getAppContext());
         Location location = null;
-        if (sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, null) != null) {
+        if (sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, "") != null && sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, "").length()>0) {
             String deviceLoc=sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, "");
 
             StringTokenizer tokens = new StringTokenizer(deviceLoc, ":");

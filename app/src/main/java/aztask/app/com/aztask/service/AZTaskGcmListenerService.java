@@ -12,6 +12,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -44,7 +47,8 @@ public class AZTaskGcmListenerService extends GcmListenerService {
         PendingIntent pendingIntent = getActivity(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         //     Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder noBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_aztask_notification_icon)
+                .setSmallIcon(R.mipmap.ic_launcher)
+               // .setLargeIcon(largeIcon(this))
                 .setContentText(data.getString("message"))
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
@@ -61,6 +65,12 @@ public class AZTaskGcmListenerService extends GcmListenerService {
             notificationManager.notify(BROADCAST_VIEW_USER_CODE, noBuilder.build()); //0 = ID of notification
         }
 
+    }
+
+    private static Bitmap largeIcon(Context context) {
+        Resources res = context.getResources();
+        Bitmap largeIcon = BitmapFactory.decodeResource(res, R.drawable.ic_task_notification);
+        return largeIcon;
     }
 
     private static NotificationCompat.Action viewUserAction(Context context,Bundle data) {

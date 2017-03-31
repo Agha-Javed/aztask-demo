@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        appContext = getApplicationContext();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         loadUser();
 
-        appContext = getApplicationContext();
+
 
         if (checkLocationPermission()) {
             Log.i(TAG, "Phone has location permission");
@@ -321,18 +322,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Gson gson = new Gson();
+        Log.i(TAG, "Device ID :" +  Util.getDeviceId());
 
-        if (preferences.getString(Util.PREF_KEY_DEVICEID, null) != null) {
-            String userRefInJSONForm = preferences.getString(Util.PREF_KEY_USER, null);
-            if (userRefInJSONForm != null) {
+        if (preferences.getString(Util.PREF_KEY_DEVICEID, "") != null && preferences.getString(Util.PREF_KEY_DEVICEID, "").length()>0) {
+            String userRefInJSONForm = preferences.getString(Util.PREF_KEY_USER, "");
+            if (userRefInJSONForm != null && userRefInJSONForm.length()>0) {
                 Log.i(TAG, "User exists in preferences, parsing it.");
                 loggedInUser = gson.fromJson(userRefInJSONForm, User.class);
             } else {
                 Log.i(TAG, "User doesn't exist in preferences, getting it from server and will save into preferences");
-                String deviceId = preferences.getString(Util.PREF_KEY_DEVICEID, null);
-                loggedInUser = getUserByDeviceId(deviceId);
-                String userInJSONForm = gson.toJson(loggedInUser);
-                preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
+                String deviceId = preferences.getString(Util.PREF_KEY_DEVICEID, "");
+                loggedInUser =(deviceId!=null && deviceId.length()>0) ? getUserByDeviceId(deviceId) : null;
+                if (loggedInUser != null) {
+                    String userInJSONForm = gson.toJson(loggedInUser);
+                    preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
+                }
             }
         } else {
             String deviceId = Util.getDeviceId();
@@ -343,7 +347,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
 
-        if (loggedInUser != null && preferences.getString(Util.PREF_GCM_TOKEN, null) == null) {
+        Log.i(TAG, "GCM Token:" + preferences.getString(Util.PREF_GCM_TOKEN, ""));
+        if (loggedInUser != null && preferences.getString(Util.PREF_GCM_TOKEN, "").length()<=0) {
             Intent itent = new Intent(getApplicationContext(), GCMRegistrationIntentService.class);
             itent.putExtra("userId", loggedInUser.getUserId());
             startService(itent);

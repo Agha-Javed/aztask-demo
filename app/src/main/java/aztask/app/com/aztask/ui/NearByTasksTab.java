@@ -7,6 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +41,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCallbacks<String> {
+public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCallbacks<Map<String,String>> {
 
     private static String TAG = "NearByTasksTab";
     private static int NEARBY_TASKS_LOADER_ID = 10;
@@ -118,6 +120,123 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
+    public Loader<Map<String, String>> onCreateLoader(int id, final Bundle args) {
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+
+        final Map<String,String> result=new ConcurrentHashMap<>();
+
+        return new AsyncTaskLoader<Map<String, String>>(getContext()) {
+
+            @Override
+            public Map<String, String> loadInBackground() {
+                Log.i("TasksDownloaderWorker", "Downloading nearby tasks.");
+                String link = "";
+                if (MainActivity.isUserRegistered())
+                    link = Util.SERVER_URL + "/tasks/list/nearby";
+                else
+                    link = Util.SERVER_URL + "/tasks/list/new";
+
+                StringBuilder jsonResult = new StringBuilder("");
+
+                try {
+                    String downloadNearbyTasksRequest = args.getString("params");// params[0];// prepareDownloadNearByTasksRequest();//taskInfo.toString();
+
+                    if (!(downloadNearbyTasksRequest != null) || !(downloadNearbyTasksRequest.length() > 0)) {
+                        Log.i(TAG, "The request is empty,so returning back.");
+                    }
+
+                    Log.i(TAG, "Request:" + downloadNearbyTasksRequest);
+
+                    URL url = new URL(link);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    con.setDoInput(true);
+                    con.setRequestProperty("Accept", "application/json");
+
+                    if (MainActivity.isUserRegistered()) {
+                        con.setRequestMethod("POST");
+                        con.setRequestProperty("Content-Type", "application/json");
+                        con.setDoOutput(true);
+
+                        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                        wr.write(downloadNearbyTasksRequest);
+                        wr.flush();
+
+                    }
+
+
+                    int HttpResult = con.getResponseCode();
+                    result.put("status",""+HttpResult);
+                    if (HttpResult == HttpURLConnection.HTTP_OK) {
+                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+                        String line = null;
+                        while ((line = br.readLine()) != null) {
+                            jsonResult.append(line + "\n");
+                        }
+                        br.close();
+
+                        result.put("response",jsonResult.toString());
+
+                        return result;
+                    } else {
+                        Log.i(TAG, con.getResponseMessage());
+                    }
+
+                } catch (Exception exception) {
+                    Log.e("CreateTaskWorker", "Error:" + exception);
+                    exception.printStackTrace();
+                }
+
+                return result;
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Map<String, String>> loader, Map<String, String> result) {
+
+        JSONArray rootArray;
+        List<TaskCard> list=new ArrayList<>();
+        try {
+            rootArray = new JSONArray(result.get("response"));
+            int len = rootArray.length();
+
+            for (int i = 0; i < len; i++) {
+                JSONObject obj = rootArray.getJSONObject(i);
+                TaskCard item = new TaskCard();
+                item.setTaskId(obj.getString("task_id"));
+                item.setTaskDesc((obj.getString("task_desc")));
+                item.setImageResourceId(R.drawable.great_wall_of_china);
+                item.setIsfav((obj.getString("liked").equalsIgnoreCase("true")) ? 1 : 0);
+                item.setIsturned(0);
+                list.add(item);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if(list.size()>0 || "200".equals(result.get("status"))){
+            TaskAdapter taskAdapter = new TaskAdapter(list);
+
+            recyclerView.setAdapter(taskAdapter);
+            recyclerView.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.VISIBLE);
+
+            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+        }else{
+            recyclerView.setVisibility(View.INVISIBLE);
+            mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            fab.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Map<String, String>> loader) {
+
+    }
+
+ /*   @Override
     public Loader<String> onCreateLoader(int id, final Bundle args) {
 
         mLoadingIndicator.setVisibility(View.VISIBLE);
@@ -227,5 +346,5 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoaderReset(Loader<String> loader) {
 
-    }
+    }*/
 }
