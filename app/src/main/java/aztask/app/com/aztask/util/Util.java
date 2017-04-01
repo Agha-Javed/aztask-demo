@@ -16,7 +16,7 @@ import android.util.Log;
 public class Util {
 
     //public static String SERVER_URL="http://10.1.19.31:9000";
-   // public static String SERVER_URL = "http://192.168.0.120:9000";
+  //  public static String SERVER_URL = "http://192.168.0.120:9000";
 //    public static String SERVER_URL = "http://10.1.106.104:9000";
 
 
