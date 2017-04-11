@@ -9,9 +9,17 @@ import aztask.app.com.aztask.net.CreateTaskWorker;
 import aztask.app.com.aztask.util.Util;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
+import android.preference.PreferenceManager;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,12 +29,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 public class CreateTaskActivity extends AppCompatActivity implements TaskCategoryDialogFragment.NoticeDialogListener {
 
     private EditText taskDesc;
     private EditText taskCategory;
+    private EditText taskLoocation;
+    private EditText taskMinBudget;
+    private EditText taskMaxBudget;
+
+
     private EditText taskComments;
 
 
@@ -44,7 +59,24 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         taskDesc = (EditText) findViewById(R.id.taskDescId);
+        taskDesc.getBackground().setColorFilter(Color.rgb(63,81,181),PorterDuff.Mode.SRC_ATOP); // change the drawable color
+
+        View photoHeader =findViewById(R.id.photoHeaderTask);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            photoHeader.setTranslationZ(100);
+            photoHeader.invalidate();
+        }
+
+/*
+        if(Build.VERSION.SDK_INT > 16) {
+            taskDesc.setBackground(drawable); // set the new drawable to EditText
+        }else{
+            taskDesc.setBackgroundDrawable(drawable); // use setBackgroundDrawable because setBackground required API 16
+        }
+*/
+
         taskCategory = (EditText) findViewById(R.id.categoryId);
+        taskCategory.getBackground().setColorFilter(Color.rgb(63,81,181),PorterDuff.Mode.SRC_ATOP); // change the drawable color
 
         taskCategory.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -61,7 +93,45 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
             }
         });
 
-        taskComments = (EditText) findViewById(R.id.commentsId);
+
+        taskLoocation = (EditText) findViewById(R.id.loc);
+        final Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        taskLoocation.getBackground().setColorFilter(Color.rgb(63,81,181),PorterDuff.Mode.SRC_ATOP);
+        taskLoocation.setOnFocusChangeListener(new View.OnFocusChangeListener()  {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.scrollView1);
+                    Snackbar.make(coordinatorLayout,"Clicked.",Snackbar.LENGTH_SHORT).show();
+                    List<Address> addresses = null;
+                    try {
+                        String latLong=sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION,"");//putString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, deviceLocation).apply();
+                        if(latLong!=null && latLong.length()>0){
+                            String[] latLongArray=latLong.split(":");
+                            addresses = geocoder.getFromLocation(Double.parseDouble(latLongArray[0]), Double.parseDouble(latLongArray[1]), 1);
+                            if(addresses.size()>0){
+                                String address=addresses.get(0).getAddressLine(0)+" "+addresses.get(0).getAddressLine(1);
+                                taskLoocation.setText(address);
+                            }
+                        }
+                          // change the drawable color
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        });
+
+        taskMinBudget = (EditText) findViewById(R.id.minBudget);
+        taskMinBudget.getBackground().setColorFilter(Color.rgb(63,81,181),PorterDuff.Mode.SRC_ATOP); // change the drawable color
+
+        taskMaxBudget = (EditText) findViewById(R.id.maxBudget);
+        taskMaxBudget.getBackground().setColorFilter(Color.rgb(63,81,181),PorterDuff.Mode.SRC_ATOP); // change the drawable color
+
+
+    //    taskComments = (EditText) findViewById(R.id.commentsId);
 
         Button submitButton = (Button) findViewById(R.id.submitId);
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -73,8 +143,14 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
 
                 task.setTaskDesc(taskDesc.getText().toString());
                 task.setTaskCategories(taskCategory.getText().toString());
-                task.setTaskComments(taskComments.getText().toString());
 
+                String minBudget=(taskMinBudget.getText()!=null) ? taskMinBudget.getText().toString():"0";
+                String maxBudget=(taskMaxBudget.getText()!=null) ? taskMaxBudget.getText().toString():"0";
+
+                String taskBudget=((minBudget!=null && minBudget.length()>0) ? minBudget :"0")+":"+((maxBudget!=null && maxBudget.length()>0) ? maxBudget :"0");
+                task.setTask_min_max_budget(taskBudget);
+
+                task.setTaskLocation(taskLoocation.getText().toString());
 
                 DeviceInfo deviceInfo = new DeviceInfo();
                 deviceInfo.setDeviceId(Util.getDeviceId());
@@ -97,6 +173,7 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
                                 Toast.LENGTH_SHORT).show();
 
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
 
                     }

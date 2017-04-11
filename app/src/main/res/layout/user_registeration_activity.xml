@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/background">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/registerUser"
@@ -21,84 +22,89 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="16dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="70dp"
+            android:background="@drawable/profile_background"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
         <EditText
-            android:inputType="text"
             android:id="@+id/nameId"
-            android:layout_width="fill_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="30dp"
-            android:background="@drawable/rounded_text_field"
             android:hint="Name"
-            android:paddingLeft="5dp"/>
+            android:inputType="text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ems="10"
+            android:imeOptions="actionDone"
+            android:textColorHint="#BDBDBD"
+            android:textCursorDrawable="@null"/>
 
         <EditText
-            android:inputType="textEmailAddress"
             android:id="@+id/emailId"
-            android:layout_width="fill_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/rounded_text_field"
             android:hint="Email"
-            android:paddingLeft="5dp" />
+            android:inputType="textEmailAddress"
+            android:paddingLeft="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ems="10"
+            android:imeOptions="actionDone"
+            android:textColorHint="#BDBDBD"
+            android:textCursorDrawable="@null" />
 
         <EditText
             android:inputType="phone"
             android:id="@+id/mobileId"
-            android:layout_width="fill_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/rounded_text_field"
             android:hint="Mobile"
-            android:paddingLeft="5dp" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ems="10"
+            android:imeOptions="actionDone"
+            android:textColorHint="#BDBDBD"
+            android:textCursorDrawable="@null" />
 
         <EditText
             android:id="@+id/skillId"
-            android:layout_width="fill_parent"
-            android:layout_height="160dp"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/rounded_text_field"
             android:hint="Skills"
-            android:paddingLeft="5dp"
             android:inputType="textMultiLine"
-            android:gravity="top"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ems="10"
+            android:imeOptions="actionDone"
+            android:textColorHint="#BDBDBD"
+            android:textCursorDrawable="@null"/>
 
             <Button
             android:id="@+id/submitId"
             android:layout_width="190dp"
             android:layout_height="38dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="40dp"
             android:background="@drawable/btn"
             android:text="Submit"
             android:textColor="#fff" />
     </LinearLayout>
 
 </LinearLayout>
-
-<!--
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="48dp"
-            android:layout_alignParentTop="true"
-            android:background="#e8e8e7"
-            android:orientation="horizontal" >
-
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|center_vertical"
-                android:layout_marginLeft="10dp"
-                android:text="Sign up"
-                android:textColor="#2582C5"
-                android:textSize="18sp"
-                android:textStyle="bold" />
--->
-
-
-
-

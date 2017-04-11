@@ -107,7 +107,9 @@ public class TasksDownloaderWorker extends AsyncTask<String, Void, String> {
 						TaskCard item = new TaskCard();
 						item.setTaskId(obj.getString("task_id"));
 						item.setTaskDesc((obj.getString("task_desc")));
-						item.setImageResourceId(R.drawable.great_wall_of_china);
+						item.setImageResourceId(R.drawable.logo);
+//						item.setImageResourceId(R.drawable.great_wall_of_china);
+
 						item.setIsfav((obj.getString("liked").equalsIgnoreCase("true")) ? 1 :0);
 						item.setIsturned(0);
 						tasksList.add(item);

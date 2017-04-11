@@ -125,31 +125,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
         }
-
-/*
-        if (bundle != null && "true".equals(bundle.getString("notification"))) {
-            Log.i(TAG, "Bundle:" + bundle + " and Notification: " + bundle.getString("notification"));
-            if (bundle != null && "true".equals(bundle.getString("notification"))) {
-                Log.i(TAG, "Bundle:" + bundle + " and Notification Type: " + bundle.getString("notification_type"));
-                if ("assigned".equals(bundle.getString("notification_type"))) {
-                    Log.i(TAG, "Setting Assigned Tasks Tab");
-                    viewPager.setCurrentItem(Util.ASSIGNED_TASKS_TAB_POSITION);
-                } else if (bundle != null && "liked".equals(bundle.getString("notification_type"))) {
-                    viewPager.setCurrentItem(Util.MY_TASKS_TAB_POSITION);
-                    Log.i(TAG, "Setting My Tasks tab");
-                }
-                adapter.setArgumentsDataForFragments(bundle);
-            } else {
-                viewPager.setCurrentItem(Util.NEARBY_TASKS_TAB_POSITION);
-                Log.i(TAG, "Setting Default Nearby Tasks.");
-
-            }
-        }
-*/
-
         loadUser();
-
-
 
         if (checkLocationPermission()) {
             Log.i(TAG, "Phone has location permission");
@@ -188,63 +164,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             Log.i(TAG, "Disconnecting google api client.");
             googleApiClient.disconnect();
         }
-    }
-
-
-    private void proceedWithPermission() {
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("NearBy Tasks"));
-        tabLayout.addTab(tabLayout.newTab().setText("Assigned Tasks"));
-        tabLayout.addTab(tabLayout.newTab().setText("My Tasks"));
-        tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
-
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
-        final TabsAdapter adapter = new TabsAdapter(this, getSupportFragmentManager(), tabLayout.getTabCount());
-        viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-
-        if (bundle != null && "true".equals(bundle.getString("notification"))) {
-            Log.i(TAG, "Bundle:" + bundle + " and Notification: " + bundle.getString("notification"));
-            if (bundle != null && "true".equals(bundle.getString("notification"))) {
-                Log.i(TAG, "Bundle:" + bundle + " and Notification Type: " + bundle.getString("notification_type"));
-                if ("assigned".equals(bundle.getString("notification_type"))) {
-                    Log.i(TAG, "Setting Assigned Tasks Tab");
-                    viewPager.setCurrentItem(Util.ASSIGNED_TASKS_TAB_POSITION);
-                } else if (bundle != null && "liked".equals(bundle.getString("notification_type"))) {
-                    viewPager.setCurrentItem(Util.MY_TASKS_TAB_POSITION);
-                    Log.i(TAG, "Setting My Tasks tab");
-                }
-                adapter.setArgumentsDataForFragments(bundle);
-            } else {
-                viewPager.setCurrentItem(Util.NEARBY_TASKS_TAB_POSITION);
-                Log.i(TAG, "Setting Default Nearby Tasks.");
-
-            }
-        }
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-                Log.i(TAG, "Setting Default Nearby Tasks.");
-
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
-
     }
 
     private User getUserByDeviceId(String deviceId) {

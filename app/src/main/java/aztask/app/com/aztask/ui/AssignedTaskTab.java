@@ -29,12 +29,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.TaskCard;
+import aztask.app.com.aztask.data.TaskComparatorByDate;
 import aztask.app.com.aztask.util.Util;
 
 import static android.R.attr.id;
@@ -184,7 +186,15 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
                 TaskCard item = new TaskCard();
                 item.setTaskId(obj.getString("task_id"));
                 item.setTaskDesc((obj.getString("task_desc")));
-                item.setImageResourceId(R.drawable.great_wall_of_china);
+//                item.setTaskTime(Util.getFormattedDate(obj.getString("task_time")));
+                item.setTaskTime(obj.getString("task_time"));
+
+                item.setTaskLocation(obj.getString("task_location"));
+                item.setTaskBudget(obj.getString("task_min_max_budget"));
+
+                item.setImageResourceId(R.drawable.app_logo);
+                item.setImageResourceId(R.drawable.app_logo);
+
                 item.setIsfav((obj.getString("liked").equalsIgnoreCase("true")) ? 1 :0);
                 item.setIsturned(0);
                 list.add(item);
@@ -195,6 +205,8 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
             e.printStackTrace();
         }
             if(list.size()>0){
+                Collections.sort(list,new TaskComparatorByDate());
+                Collections.reverse(list);
                 TaskAdapter taskAdapter=new TaskAdapter(list);
                 mRecyclerView.setAdapter(taskAdapter);
                 mRecyclerView.setVisibility(View.VISIBLE);

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
-    card_view:cardCornerRadius="4dp">
+    card_view:cardCornerRadius="5dp">
 
 
     <LinearLayout
@@ -19,7 +19,7 @@
             android:layout_weight="3.2"
             android:orientation="vertical">
 
-            
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -27,55 +27,129 @@
 
                 <ImageView
                     android:id="@+id/coverImageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="170dp"
+                    android:layout_height="130dp"
                     android:layout_gravity="center"
                     android:scaleType="centerCrop"
-                    />
+                    android:background="#FDFDFD"
+                    android:alpha="0.3"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start|top"
-                    android:background="@android:drawable/screen_background_dark_transparent"
                     android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/titleTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
+                        android:padding="8dp"
                         android:textSize="@dimen/text_size"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold" />
+                        android:textColor="#000000"
+                        android:fontFamily="sans-serif"
+                        android:textStyle="normal"/>
+
                 </LinearLayout>
             </FrameLayout>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dip"
-            android:layout_weight="0.8"
-            android:gravity="center|right"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold|italic"
+                android:text="created by: Javed"
+                android:gravity="left"
+                android:layout_gravity="center_vertical"
+                android:padding="5dp"
+                android:layout_weight=".6"/>
+
+            <ImageView
+                android:id="@+id/msg"
+                android:layout_width="35dip"
+                android:layout_height="35dip"
+                android:layout_gravity="center_vertical"
+                android:padding="@dimen/icon_padding"
+                android:src="@drawable/ic_message_black_24dp"
+                android:gravity="center"
+                android:layout_weight=".1"/>
+
+            <ImageView
+                android:id="@+id/phone"
+                android:layout_width="35dip"
+                android:layout_height="35dip"
+                android:layout_gravity="center_vertical"
+                android:padding="@dimen/icon_padding"
+                android:src="@drawable/ic_phone_black"
+                android:gravity="center"
+                android:layout_weight=".1"/>
+
+<!--
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+-->
+
+            <TextView
+                android:id="@+id/taskDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="@color/colorAccent"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold|italic"
+                android:text=""
+                android:gravity="right"
+                android:layout_gravity="center_vertical"
+                android:paddingRight="5dp"
+                android:layout_weight=".6"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="0.9"
+            android:orientation="horizontal"
+            android:background="@color/colorPrimary">
+
+            <TextView
+                android:id="@+id/tvTaskMetaData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="#FFF"
+                android:fontFamily="sans-serif"
+                android:textStyle="normal"
+                android:text=""
+                android:layout_gravity="left"
+                android:padding="5dp"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <ImageView
                 android:id="@+id/likeImageView"
                 android:layout_width="@dimen/icon_width"
                 android:layout_height="@dimen/icon_height"
+                android:layout_gravity="center_vertical"
                 android:padding="@dimen/icon_padding"
-                android:src="@drawable/ic_like" />
+                android:src="@drawable/ic_like"/>
 
-<!--
-            <ImageView
-                android:id="@+id/shareImageView"
-                android:layout_width="@dimen/icon_width"
-                android:layout_height="@dimen/icon_height"
-                android:padding="@dimen/icon_padding"
-                android:src="@drawable/ic_share" />
--->
+
         </LinearLayout>
 
-        
     </LinearLayout>
 </android.support.v7.widget.CardView>

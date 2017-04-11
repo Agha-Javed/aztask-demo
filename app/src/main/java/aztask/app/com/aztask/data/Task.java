@@ -4,16 +4,18 @@ public class Task {
 
 	private String taskDesc;
 	private String taskCategories;
-	private String taskComments;
+	private String taskLocation;
+	private String task_min_max_budget;
 	private DeviceInfo deviceInfo;
 	
 	public Task(){}
 
-	public Task(String taskDesc, String taskCategories, String taskComments,DeviceInfo deviceInfo) {
+	public Task(String taskDesc, String taskCategories, String task_min_max_budget,String taskLocation,DeviceInfo deviceInfo) {
 		super();
 		this.taskDesc = taskDesc;
 		this.taskCategories = taskCategories;
-		this.taskComments=taskComments;
+		this.taskLocation=taskLocation;
+		this.task_min_max_budget =task_min_max_budget;
 		this.deviceInfo = deviceInfo;
 	}
 
@@ -41,17 +43,25 @@ public class Task {
 		this.deviceInfo = deviceInfo;
 	}
 	
-	public String getTaskComments() {
-		return taskComments;
+	public String getTask_min_max_budget() {
+		return task_min_max_budget;
 	}
 
-	public void setTaskComments(String taskComments) {
-		this.taskComments = taskComments;
+	public void setTask_min_max_budget(String task_min_max_budget) {
+		this.task_min_max_budget = task_min_max_budget;
+	}
+
+	public String getTaskLocation() {
+		return taskLocation;
+	}
+
+	public void setTaskLocation(String taskLocation) {
+		this.taskLocation = taskLocation;
 	}
 
 	@Override
 	public String toString() {
 		return "Task [taskDesc=" + taskDesc + "]";
 	}
-	
+
 }

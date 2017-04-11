@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import aztask.app.com.aztask.data.DeviceInfo;
 import aztask.app.com.aztask.data.Task;
 import aztask.app.com.aztask.data.TaskCard;
 
+import aztask.app.com.aztask.data.TaskComparatorByDate;
 import aztask.app.com.aztask.data.User;
 import aztask.app.com.aztask.ui.CreateTaskActivity;
 import aztask.app.com.aztask.ui.MainActivity;
@@ -172,7 +174,6 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                             result.append(line + "\n");
                         }
                         br.close();
-                        Log.i(TAG, "My Tasks Response:" + result.toString());
                     }
                 } catch (Exception exception) {
                     Log.e("CreateTaskWorker", "Error:" + exception);
@@ -199,7 +200,12 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                 TaskCard item = new TaskCard();
                 item.setTaskId(obj.getString("task_id"));
                 item.setTaskDesc((obj.getString("task_desc")));
-                item.setImageResourceId(R.drawable.great_wall_of_china);
+                item.setTaskTime(obj.getString("task_time"));
+                item.setTaskLocation(obj.getString("task_location"));
+                item.setTaskBudget(obj.getString("task_min_max_budget"));
+                item.setImageResourceId(R.drawable.app_logo);
+                item.setImageResourceId(R.drawable.app_logo);
+
                 item.setIsfav(0);
                 item.setIsturned(0);
                 list.add(item);
@@ -211,7 +217,8 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
 
 
         if (list.size() > 0) {
-//            taskAdapter.setData(list);
+            Collections.sort(list,new TaskComparatorByDate());
+            Collections.reverse(list);
             TaskAdapter taskAdapter = new TaskAdapter(list);
             recyclerView.setAdapter(taskAdapter);
 
@@ -245,7 +252,7 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
 
     class DeleteTaskWorker extends AsyncTask<String, Void, String> {
 
-        String TAG = "MyTasksTab.DeleteTaskWorker";
+        String TAG = "MyTask.DeleteTaskWorker";
 
         @Override
         protected String doInBackground(String... params) {

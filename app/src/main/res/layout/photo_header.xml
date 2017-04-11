@@ -6,9 +6,9 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/civProfilePic"
-        android:layout_width="140dp"
-        android:layout_height="140dp"
-        android:src="@drawable/machu_picchu"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/smiley"
         app:civ_border_color="#ffffff"
         app:civ_border_width="3dp" />
 

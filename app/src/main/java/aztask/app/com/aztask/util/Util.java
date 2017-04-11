@@ -1,5 +1,10 @@
 package aztask.app.com.aztask.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
@@ -7,17 +12,19 @@ import java.util.UUID;
 import aztask.app.com.aztask.data.User;
 import aztask.app.com.aztask.ui.MainActivity;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 public class Util {
 
     //public static String SERVER_URL="http://10.1.19.31:9000";
-  //  public static String SERVER_URL = "http://192.168.0.120:9000";
-//    public static String SERVER_URL = "http://10.1.106.104:9000";
+    //public static String SERVER_URL = "http://172.16.2.68:9000";
+//    public static String SERVER_URL = "http://172.16.2.68:9000";
 
 
     public static String SERVER_URL="http://aztask-demo.herokuapp.com";
@@ -86,6 +93,39 @@ public class Util {
         }
 
         return location;
+    }
+
+
+    public static String getFormattedDate(String taskTimeInString) {
+
+        try {
+            final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+            Date date = new SimpleDateFormat(TIME_FORMAT, Locale.ENGLISH).parse(taskTimeInString);
+            long timeInMilis= date.getTime();
+
+            Calendar taskTime = Calendar.getInstance();
+            taskTime.setTimeInMillis(timeInMilis);
+
+            Calendar now = Calendar.getInstance();
+
+            final String dateTimeFormatString = "EEE, dd/MM/yyyy, h:mm";
+            final String onlyTimeTimeFormatString = "h:mm";
+
+            final long HOURS = 60 * 60 * 60;
+            String meridiem = taskTime.getDisplayName(Calendar.AM_PM, Calendar.SHORT, Locale.getDefault());
+            if (now.get(Calendar.DATE) == taskTime.get(Calendar.DATE) ) {
+                return "today "+ DateFormat.format(onlyTimeTimeFormatString, taskTime)+meridiem;
+            } else if (now.get(Calendar.DATE) - taskTime.get(Calendar.DATE) == 1  ){
+                return "yesterday "+ DateFormat.format(onlyTimeTimeFormatString, taskTime)+meridiem;
+            } else {
+                return DateFormat.format(dateTimeFormatString, taskTime).toString()+meridiem;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return "";
+
     }
 
 

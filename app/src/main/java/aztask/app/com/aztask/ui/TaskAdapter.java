@@ -1,13 +1,16 @@
 package aztask.app.com.aztask.ui;
 
 import java.util.List;
+import java.util.StringTokenizer;
 
 import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.service.TaskNotificationService;
+import aztask.app.com.aztask.util.Util;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -38,13 +41,41 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public void onBindViewHolder(final TaskViewHolder holder, int position) {
         holder.titleTextView.setText(list.get(position).getTaskDesc());
         holder.titleTextView.setId(Integer.parseInt(list.get(position).getTaskId()));
+//        holder.tvTaskDate.setText(list.get(position).getTaskTime());
+        holder.tvTaskDate.setText(Util.getFormattedDate(list.get(position).getTaskTime()));
+
+
+        StringTokenizer tokens =(list.get(position).getTaskBudget()!=null) ? new StringTokenizer(list.get(position).getTaskBudget(), ":") : null;
+        String minBudget =(tokens!=null) ? tokens.nextToken() :"0";
+        String maxBudget =(tokens!=null) ? tokens.nextToken() :"0";
+
+        String taskLocation=list.get(position).getTaskLocation();
+
+        String taskMetaData="Budget:"+minBudget+"RM to "+maxBudget+"RM";
+        taskMetaData+="\nLocation:"+taskLocation;
+
+        holder.tvTaskMetaData.setText(taskMetaData);
+
         holder.coverImageView.setImageResource(list.get(position).getImageResourceId());
         holder.coverImageView.setTag(list.get(position).getImageResourceId());
-        holder.likeImageView.setTag((list.get(position).getIsfav() > 0) ? R.drawable.ic_liked : R.drawable.ic_like);
-        holder.likeImageView.setImageResource((list.get(position).getIsfav() > 0) ? R.drawable.ic_liked : R.drawable.ic_like);
+
+        if((list.get(position).getIsfav() > 0)){
+            holder.likeImageView.setTag(R.drawable.ic_liked);// : R.drawable.ic_like);
+            holder.likeImageView.setImageResource(R.drawable.ic_liked);
+            int color = Color.parseColor("#FF0080");
+            holder.likeImageView.setColorFilter(color);
+        }else{
+            holder.likeImageView.setTag(R.drawable.ic_like);
+            holder.likeImageView.setImageResource(R.drawable.ic_like);
+
+        }
+
+
 
         holder.itemView.setTag(list.get(position).getTaskId());
     }
+
+
 
     @Override
     public int getItemCount() {
@@ -56,6 +87,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     class TaskViewHolder extends RecyclerView.ViewHolder {
 
         TextView titleTextView;
+        TextView tvTaskDate;
+        TextView tvTaskMetaData;
+
+
         ImageView coverImageView;
         ImageView likeImageView;
        // ImageView shareImageView;
@@ -63,6 +98,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TaskViewHolder(View v) {
             super(v);
             titleTextView = (TextView) v.findViewById(R.id.titleTextView);
+            tvTaskDate= (TextView) v.findViewById(R.id.taskDate);
+            tvTaskMetaData= (TextView) v.findViewById(R.id.tvTaskMetaData);
+
             coverImageView = (ImageView) v.findViewById(R.id.coverImageView);
             likeImageView = (ImageView) v.findViewById(R.id.likeImageView);
            // shareImageView = (ImageView) v.findViewById(shareImageView);
@@ -82,6 +120,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
                         likeImageView.setTag(R.drawable.ic_liked);
                         likeImageView.setImageResource(R.drawable.ic_liked);
+                        int color = Color.parseColor("#FF0080");
+                        likeImageView.setColorFilter(color);
+
 
                         Intent itent = new Intent(MainActivity.getAppContext(), TaskNotificationService.class);
                         itent.putExtra("action", "likeTask");

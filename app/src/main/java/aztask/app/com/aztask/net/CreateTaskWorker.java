@@ -87,7 +87,9 @@ public class CreateTaskWorker extends AsyncTask<Task, Void, String>{
 				taskInfo.put("latitude", task.getDeviceInfo().getLatitude());
 				taskInfo.put("longitude", task.getDeviceInfo().getLongitude());
 				taskInfo.put("device_id", task.getDeviceInfo().getDeviceId());
-				//taskInfo.put("user_id",""+MainActivity.getUserId());
+				taskInfo.put("task_location", task.getTaskLocation());
+				taskInfo.put("task_min_max_budget", task.getTask_min_max_budget());
+
 				return taskInfo.toString();
 
 			} catch (JSONException e) {

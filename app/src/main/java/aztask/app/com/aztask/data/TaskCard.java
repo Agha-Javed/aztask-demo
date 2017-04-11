@@ -7,6 +7,9 @@ public class TaskCard {
 
 	private String taskId;
 	private String taskDesc;
+    private String taskLocation;
+    private String taskBudget;
+    private String taskTime;
     private int imageResourceId;
     private int isfav;
     private int isturned;
@@ -51,6 +54,29 @@ public class TaskCard {
 		this.taskDesc = taskDesc;
 	}
 
+    public String getTaskLocation() {
+        return taskLocation;
+    }
+
+    public void setTaskLocation(String taskLocation) {
+        this.taskLocation = taskLocation;
+    }
+
+    public String getTaskBudget() {
+        return taskBudget;
+    }
+
+    public void setTaskBudget(String taskBudget) {
+        this.taskBudget = taskBudget;
+    }
+
+    public String getTaskTime() {
+        return taskTime;
+    }
+
+    public void setTaskTime(String taskTime) {
+        this.taskTime = taskTime;
+    }
 }
 
 

@@ -1,11 +1,10 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollView1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:background="@drawable/background">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/createTaskToolbar"
@@ -16,75 +15,126 @@
         android:elevation="6dp"
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-        </android.support.v7.widget.Toolbar>
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"></android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:id="@+id/newTaskLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="150dp"
+        android:background="@drawable/profile_background"
+        android:elevation="2dp"
+        android:orientation="vertical"
+        android:paddingBottom="16dp">
+
+        <EditText
+            android:id="@+id/taskDescId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ems="10"
+            android:hint="What do you want?"
+            android:imeOptions="actionDone"
+            android:inputType="textMultiLine"
+            android:textColorHint="#BDBDBD"
+            android:textCursorDrawable="@null" />
+
+        <EditText
+            android:id="@+id/categoryId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ems="10"
+            android:hint="Work category?"
+            android:imeOptions="actionDone"
+            android:inputType="textMultiLine"
+            android:textColorHint="#BDBDBD"
+            android:textCursorDrawable="@null" />
+
+
+        <EditText
+            android:id="@+id/loc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:ems="10"
+            android:hint="Location?"
+            android:imeOptions="actionDone"
+            android:inputType="textMultiLine"
+            android:textColorHint="#BDBDBD"
+            android:textCursorDrawable="@null" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="16dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:orientation="horizontal">
+
 
             <EditText
-                android:id="@+id/taskDescId"
-                android:layout_width="fill_parent"
+                android:id="@+id/minBudget"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:background="@drawable/rounded_text_field"
-                android:gravity="top|left"
-                android:hint="Work Description?"
-                android:inputType="textMultiLine"
-                android:lines="8"
-                android:maxLines="10"
-                android:minLines="5"
-                android:paddingLeft="5dp"
-                android:scrollbars="vertical" />
-
-            <EditText
-                android:id="@+id/categoryId"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="45dp"
-                android:background="@drawable/rounded_text_field"
-                android:gravity="top|left"
-                android:hint="What is task category?"
-                android:lines="8"
-                android:maxLines="10"
-                android:minLines="3"
-                android:paddingLeft="5dp"
-                android:scrollbars="vertical" />
-
-            <EditText
-                android:id="@+id/commentsId"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="50dp"
-                android:background="@drawable/rounded_text_field"
-                android:gravity="top|left"
-                android:hint="Comments"
-                android:lines="8"
-                android:maxLines="10"
-                android:minLines="3"
-                android:paddingLeft="5dp"
-                android:scrollbars="vertical" />
-
-            <!--<Spinner
-                android:id="@+id/categoryId"
-                android:layout_marginTop="50dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:entries="@array/task_categories_arrays"
-                android:hint="Work Category" />-->
-
-            <Button
-                android:id="@+id/submitId"
-                android:layout_width="190dp"
-                android:layout_height="38dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="55dp"
-                android:background="@drawable/btn"
-                android:text="submit"
-                android:textColor="#fff" />
-        </LinearLayout>
+                android:layout_marginTop="15dp"
+                android:ems="10"
+                android:hint="Min $"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine"
+                android:textColorHint="#BDBDBD"
+                android:textCursorDrawable="@null"
+                android:gravity="center"/>
 
-</LinearLayout>
+            <EditText
+                android:id="@+id/maxBudget"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="15dp"
+                android:ems="10"
+                android:hint="Max $"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine"
+                android:textColorHint="#BDBDBD"
+                android:textCursorDrawable="@null"
+                android:gravity="center"/>
+
+        </LinearLayout>
+        <Button
+            android:id="@+id/submitId"
+            android:layout_width="190dp"
+            android:layout_height="38dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="55dp"
+            android:background="@drawable/btn"
+            android:text="submit"
+            android:textColor="#fff" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/photoHeaderTask"
+        layout="@layout/photo_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/newTaskLayout"
+        app:layout_anchorGravity="top|center"/>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ import org.w3c.dom.Text;
 
 import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.TaskCard;
+import aztask.app.com.aztask.data.TaskComparatorByDate;
 import aztask.app.com.aztask.net.TasksDownloaderWorker;
 import aztask.app.com.aztask.util.Util;
 
@@ -205,7 +207,15 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
                 TaskCard item = new TaskCard();
                 item.setTaskId(obj.getString("task_id"));
                 item.setTaskDesc((obj.getString("task_desc")));
-                item.setImageResourceId(R.drawable.great_wall_of_china);
+//                item.setTaskTime(Util.getFormattedDate(obj.getString("task_time")));
+                item.setTaskTime(obj.getString("task_time"));
+
+                item.setTaskLocation(obj.getString("task_location"));
+                item.setTaskBudget(obj.getString("task_min_max_budget"));
+
+                item.setImageResourceId(R.drawable.app_logo);
+                item.setImageResourceId(R.drawable.app_logo);
+
                 item.setIsfav((obj.getString("liked").equalsIgnoreCase("true")) ? 1 : 0);
                 item.setIsturned(0);
                 list.add(item);
@@ -214,6 +224,8 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
             e.printStackTrace();
         }
         if(list.size()>0 || "200".equals(result.get("status"))){
+            Collections.sort(list,new TaskComparatorByDate());
+            Collections.reverse(list);
             TaskAdapter taskAdapter = new TaskAdapter(list);
 
             recyclerView.setAdapter(taskAdapter);
@@ -236,115 +248,4 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
 
     }
 
- /*   @Override
-    public Loader<String> onCreateLoader(int id, final Bundle args) {
-
-        mLoadingIndicator.setVisibility(View.VISIBLE);
-
-        return new AsyncTaskLoader<String>(getContext()) {
-
-            @Override
-            public String loadInBackground() {
-                Log.i("TasksDownloaderWorker", "Downloading nearby tasks.");
-                String link = "";
-                if (MainActivity.isUserRegistered())
-                    link = Util.SERVER_URL + "/tasks/list/nearby";
-                else
-                    link = Util.SERVER_URL + "/tasks/list/new";
-
-                StringBuilder result = new StringBuilder("");
-
-                try {
-                    String downloadNearbyTasksRequest = args.getString("params");// params[0];// prepareDownloadNearByTasksRequest();//taskInfo.toString();
-
-                    if (!(downloadNearbyTasksRequest != null) || !(downloadNearbyTasksRequest.length() > 0)) {
-                        Log.i(TAG, "The request is empty,so returning back.");
-                    }
-
-                    Log.i(TAG, "Request:" + downloadNearbyTasksRequest);
-
-                    URL url = new URL(link);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    con.setDoInput(true);
-                    con.setRequestProperty("Accept", "application/json");
-
-                    if (MainActivity.isUserRegistered()) {
-                        con.setRequestMethod("POST");
-                        con.setRequestProperty("Content-Type", "application/json");
-                        con.setDoOutput(true);
-
-                        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-                        wr.write(downloadNearbyTasksRequest);
-                        wr.flush();
-
-                    }
-
-
-                    int HttpResult = con.getResponseCode();
-                    if (HttpResult == HttpURLConnection.HTTP_OK) {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-                        String line = null;
-                        while ((line = br.readLine()) != null) {
-                            result.append(line + "\n");
-                        }
-                        br.close();
-
-                        return result.toString();
-                    } else {
-                        Log.i(TAG, con.getResponseMessage());
-                    }
-
-                } catch (Exception exception) {
-                    Log.e("CreateTaskWorker", "Error:" + exception);
-                    exception.printStackTrace();
-                }
-
-                return result.toString();
-            }
-        };
-    }
-
-    @Override
-    public void onLoadFinished(Loader<String> loader, String data) {
-        JSONArray rootArray;
-        List<TaskCard> list=new ArrayList<>();
-        try {
-            rootArray = new JSONArray(data);
-            int len = rootArray.length();
-
-            for (int i = 0; i < len; i++) {
-                JSONObject obj = rootArray.getJSONObject(i);
-                TaskCard item = new TaskCard();
-                item.setTaskId(obj.getString("task_id"));
-                item.setTaskDesc((obj.getString("task_desc")));
-                item.setImageResourceId(R.drawable.great_wall_of_china);
-                item.setIsfav((obj.getString("liked").equalsIgnoreCase("true")) ? 1 : 0);
-                item.setIsturned(0);
-                list.add(item);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if(list.size()>0){
-            TaskAdapter taskAdapter = new TaskAdapter(list);
-
-            recyclerView.setAdapter(taskAdapter);
-            recyclerView.setVisibility(View.VISIBLE);
-            fab.setVisibility(View.VISIBLE);
-
-            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-        }else{
-            recyclerView.setVisibility(View.INVISIBLE);
-            mErrorMessageDisplay.setVisibility(View.VISIBLE);
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            fab.setVisibility(View.INVISIBLE);
-        }
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<String> loader) {
-
-    }*/
 }
