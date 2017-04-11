@@ -1,8 +1,5 @@
 package aztask.app.com.aztask.data;
 
-/**
- * Created by anonymous on 1/15/16.
- */
 public class TaskCard {
 
 	private String taskId;
@@ -10,6 +7,9 @@ public class TaskCard {
     private String taskLocation;
     private String taskBudget;
     private String taskTime;
+    private String taskOwnerContact;
+    private String taskOwnerName;
+
     private int imageResourceId;
     private int isfav;
     private int isturned;
@@ -76,6 +76,22 @@ public class TaskCard {
 
     public void setTaskTime(String taskTime) {
         this.taskTime = taskTime;
+    }
+
+    public String getTaskOwnerContact() {
+        return taskOwnerContact;
+    }
+
+    public void setTaskOwnerContact(String taskOwnerContact) {
+        this.taskOwnerContact = taskOwnerContact;
+    }
+
+    public String getTaskOwnerName() {
+        return taskOwnerName;
+    }
+
+    public void setTaskOwnerName(String taskOwnerName) {
+        this.taskOwnerName = taskOwnerName;
     }
 }
 

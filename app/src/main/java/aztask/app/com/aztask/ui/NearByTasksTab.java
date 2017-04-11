@@ -212,6 +212,10 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
 
                 item.setTaskLocation(obj.getString("task_location"));
                 item.setTaskBudget(obj.getString("task_min_max_budget"));
+                item.setTaskOwnerContact(obj.getString("contact"));
+                item.setTaskOwnerName(obj.getString("user"));
+
+                Log.i(TAG,"Task Owner Contact:"+item.getTaskOwnerContact());
 
                 item.setImageResourceId(R.drawable.app_logo);
                 item.setImageResourceId(R.drawable.app_logo);

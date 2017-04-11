@@ -16,9 +16,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import static aztask.app.com.aztask.R.id.btnCall;
+import static aztask.app.com.aztask.R.id.tvUserName;
 
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
@@ -59,6 +63,19 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         holder.coverImageView.setImageResource(list.get(position).getImageResourceId());
         holder.coverImageView.setTag(list.get(position).getImageResourceId());
 
+        if(list.get(position).getTaskOwnerContact()!=null){
+            holder.ivCall.setTag(list.get(position).getTaskOwnerContact());
+            holder.ivMsg.setTag(list.get(position).getTaskOwnerContact());
+            holder.tvUserName.append(list.get(position).getTaskOwnerName());
+            holder.ivCall.setVisibility(View.VISIBLE);
+            holder.ivMsg.setVisibility(View.VISIBLE);
+            holder.tvUserName.setVisibility(View.VISIBLE);
+        }else{
+            holder.ivCall.setVisibility(View.INVISIBLE);
+            holder.ivMsg.setVisibility(View.INVISIBLE);
+            holder.tvUserName.setVisibility(View.INVISIBLE);
+        }
+
         if((list.get(position).getIsfav() > 0)){
             holder.likeImageView.setTag(R.drawable.ic_liked);// : R.drawable.ic_like);
             holder.likeImageView.setImageResource(R.drawable.ic_liked);
@@ -89,10 +106,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView titleTextView;
         TextView tvTaskDate;
         TextView tvTaskMetaData;
+        TextView tvUserName;
 
+
+        ImageView ivMsg;
+        ImageView ivCall;
 
         ImageView coverImageView;
         ImageView likeImageView;
+
        // ImageView shareImageView;
 
         TaskViewHolder(View v) {
@@ -103,7 +125,41 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
             coverImageView = (ImageView) v.findViewById(R.id.coverImageView);
             likeImageView = (ImageView) v.findViewById(R.id.likeImageView);
-           // shareImageView = (ImageView) v.findViewById(shareImageView);
+
+            tvUserName = (TextView) v.findViewById(R.id.tvUserName);
+
+            ivMsg= (ImageView) v.findViewById(R.id.msg);
+            ivMsg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Hi Javed,");
+                    sendIntent.putExtra("address",""+ivMsg.getTag());
+                    sendIntent.setType("text/plain");
+                    sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    MainActivity.getAppContext().startActivity(sendIntent);
+                }
+            });
+
+            ivCall= (ImageView) v.findViewById(R.id.phone);
+            ivCall.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!MainActivity.isUserRegistered()) {
+                        Toast.makeText(MainActivity.getAppContext(), " Please register first.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:"+ivCall.getTag()));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    MainActivity.getAppContext().startActivity(intent);
+                }
+            });
+
+
+            // shareImageView = (ImageView) v.findViewById(shareImageView);
 
             likeImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
