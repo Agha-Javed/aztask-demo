@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import static aztask.app.com.aztask.R.id.minBudget;
+
 public class CreateTaskActivity extends AppCompatActivity implements TaskCategoryDialogFragment.NoticeDialogListener {
 
     private EditText taskDesc;
@@ -124,7 +126,7 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
             }
         });
 
-        taskMinBudget = (EditText) findViewById(R.id.minBudget);
+        taskMinBudget = (EditText) findViewById(minBudget);
         taskMinBudget.getBackground().setColorFilter(Color.rgb(63,81,181),PorterDuff.Mode.SRC_ATOP); // change the drawable color
 
         taskMaxBudget = (EditText) findViewById(R.id.maxBudget);
@@ -141,16 +143,37 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
 
                 Task task = new Task();
 
-                task.setTaskDesc(taskDesc.getText().toString());
-                task.setTaskCategories(taskCategory.getText().toString());
+                String taskDescription=taskDesc.getText().toString();
+                if(taskDescription!=null && taskDescription.trim().length()>0){
+                    task.setTaskDesc(taskDescription);
+                }else{
+                    taskDesc.setError("task can't be empty.");
+                    return;
+                }
+
+                String taskCategories=taskCategory.getText().toString();
+                if(taskCategories!=null && taskCategories.trim().length()>0){
+                    task.setTaskCategories(taskCategories);
+                }else{
+                    taskCategory.setError("task category can't be empty.");
+                    return;
+                }
+
+                String taskLocation=taskLoocation.getText().toString();
+                if(taskLocation!=null && taskLocation.trim().length()>0){
+                    task.setTaskLocation(taskLoocation.getText().toString());
+                }else{
+                    taskLoocation.setError("task location can't be empty.");
+                    return;
+                }
 
                 String minBudget=(taskMinBudget.getText()!=null) ? taskMinBudget.getText().toString():"0";
+
                 String maxBudget=(taskMaxBudget.getText()!=null) ? taskMaxBudget.getText().toString():"0";
 
                 String taskBudget=((minBudget!=null && minBudget.length()>0) ? minBudget :"0")+":"+((maxBudget!=null && maxBudget.length()>0) ? maxBudget :"0");
                 task.setTask_min_max_budget(taskBudget);
 
-                task.setTaskLocation(taskLoocation.getText().toString());
 
                 DeviceInfo deviceInfo = new DeviceInfo();
                 deviceInfo.setDeviceId(Util.getDeviceId());
@@ -193,7 +216,9 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
 
     @Override
     public void onDialogPositiveClick(String selectedOptions) {
-        taskCategory.setText(selectedOptions);
+        if(selectedOptions!=null && selectedOptions.trim().length()>0){
+            taskCategory.setText(selectedOptions.substring(0,selectedOptions.length()-1));
+        }
     }
 
     @Override

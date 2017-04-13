@@ -129,4 +129,15 @@ public class Util {
     }
 
 
+    public static String shortenText(String text){
+        if(text!=null && text.length()>0){
+            if(text.length()>50){
+                String trimmedText = text.substring(0, Math.min(text.length(), 40));
+                return trimmedText+"..";
+            }
+        }
+        return text;
+    }
+
+
 }

@@ -46,11 +46,10 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:ems="10"
-            android:imeOptions="actionDone"
             android:textColorHint="#BDBDBD"
             android:textCursorDrawable="@null"/>
 
-        <EditText
+        <!--<EditText
             android:id="@+id/emailId"
             android:hint="Email"
             android:inputType="textEmailAddress"
@@ -64,7 +63,7 @@
             android:ems="10"
             android:imeOptions="actionDone"
             android:textColorHint="#BDBDBD"
-            android:textCursorDrawable="@null" />
+            android:textCursorDrawable="@null" />-->
 
         <EditText
             android:inputType="phone"

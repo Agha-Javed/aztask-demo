@@ -55,7 +55,7 @@ import static android.R.id.message;
 import static aztask.app.com.aztask.R.id.fab;
 import static java.lang.Integer.parseInt;
 
-public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallbacks<String> {
+public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallbacks<Map<String, String>> {
 
     private final String TAG = "MyTasksTab";
 
@@ -106,7 +106,7 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                 //[Hint] Use getTag (from the adapter code) to get the id of the swiped item
                 // Retrieve the id of the task to delete
                 String taskId = (String) viewHolder.itemView.getTag();
-                Log.i(TAG,"Task "+taskId+" is gonna be deleted.");
+                Log.i(TAG, "Task " + taskId + " is gonna be deleted.");
 
                 new DeleteTaskWorker().execute(taskId);
 
@@ -144,19 +144,19 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
     }
 
     @Override
-    public Loader<String> onCreateLoader(int id, Bundle args) {
-
+    public Loader<Map<String, String>> onCreateLoader(int id, Bundle args) {
         mLoadingIndicator.setVisibility(View.VISIBLE);
+        final Map<String, String> result = new ConcurrentHashMap<>();
 
-        return new AsyncTaskLoader<String>(getContext()) {
+        return new AsyncTaskLoader<Map<String, String>>(getContext()) {
 
 
             @Override
-            public String loadInBackground() {
+            public Map<String, String> loadInBackground() {
 
                 Log.i("MyTasksDownloadWorker", "Downloading my tasks.");
                 String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/tasks";
-                StringBuilder result = new StringBuilder("");
+                StringBuilder response = new StringBuilder("");
 
                 try {
                     Log.d(TAG, "Link:" + link);
@@ -167,33 +167,36 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                     con.setRequestProperty("Accept", "application/json");
 
                     int HttpResult = con.getResponseCode();
+                    result.put("status", "" + HttpResult);
                     if (HttpResult == HttpURLConnection.HTTP_OK) {
                         BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
                         String line = null;
                         while ((line = br.readLine()) != null) {
-                            result.append(line + "\n");
+                            response.append(line + "\n");
                         }
                         br.close();
+                        result.put("response", response.toString());
+                        return result;
                     }
                 } catch (Exception exception) {
                     Log.e("CreateTaskWorker", "Error:" + exception);
                     exception.printStackTrace();
                 }
 
-                return result.toString();
+                return result;
             }
         };
     }
 
     @Override
-    public void onLoadFinished(Loader<String> loader, String data) {
+    public void onLoadFinished(Loader<Map<String, String>> loader, Map<String, String> result) {
 
         JSONArray rootArray;
         List<TaskCard> list = new ArrayList<>();
         positions = new ConcurrentHashMap<Integer, Integer>();
 
         try {
-            rootArray = new JSONArray(data);
+            rootArray = new JSONArray(result.get("response"));
             int len = rootArray.length();
             for (int i = 0; i < len; i++) {
                 JSONObject obj = rootArray.getJSONObject(i);
@@ -216,8 +219,8 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
         }
 
 
-        if (list.size() > 0) {
-            Collections.sort(list,new TaskComparatorByDate());
+        if (list.size() > 0 && "200".equals(result.get("status"))) {
+            Collections.sort(list, new TaskComparatorByDate());
             Collections.reverse(list);
             TaskAdapter taskAdapter = new TaskAdapter(list);
             recyclerView.setAdapter(taskAdapter);
@@ -241,15 +244,128 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
             mErrorMessageDisplay.setVisibility(View.VISIBLE);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             fab.setVisibility(View.INVISIBLE);
+
+            if(list.size()==0){
+                mErrorMessageDisplay.setText("You have not created any task yet.");
+                fab.setVisibility(View.VISIBLE);
+            }
+
         }
 
     }
 
     @Override
-    public void onLoaderReset(Loader<String> loader) {
+    public void onLoaderReset(Loader<Map<String, String>> loader) {
 
     }
 
+    /* @Override
+     public Loader<String> onCreateLoader(int id, Bundle args) {
+
+         mLoadingIndicator.setVisibility(View.VISIBLE);
+
+         return new AsyncTaskLoader<String>(getContext()) {
+
+
+             @Override
+             public String loadInBackground() {
+
+                 Log.i("MyTasksDownloadWorker", "Downloading my tasks.");
+                 String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/tasks";
+                 StringBuilder result = new StringBuilder("");
+
+                 try {
+                     Log.d(TAG, "Link:" + link);
+
+                     URL url = new URL(link);
+                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                     con.setDoInput(true);
+                     con.setRequestProperty("Accept", "application/json");
+
+                     int HttpResult = con.getResponseCode();
+                     if (HttpResult == HttpURLConnection.HTTP_OK) {
+                         BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+                         String line = null;
+                         while ((line = br.readLine()) != null) {
+                             result.append(line + "\n");
+                         }
+                         br.close();
+                     }
+                 } catch (Exception exception) {
+                     Log.e("CreateTaskWorker", "Error:" + exception);
+                     exception.printStackTrace();
+                 }
+
+                 return result.toString();
+             }
+         };
+     }
+
+     @Override
+     public void onLoadFinished(Loader<String> loader, String data) {
+
+         JSONArray rootArray;
+         List<TaskCard> list = new ArrayList<>();
+         positions = new ConcurrentHashMap<Integer, Integer>();
+
+         try {
+             rootArray = new JSONArray(data);
+             int len = rootArray.length();
+             for (int i = 0; i < len; i++) {
+                 JSONObject obj = rootArray.getJSONObject(i);
+                 TaskCard item = new TaskCard();
+                 item.setTaskId(obj.getString("task_id"));
+                 item.setTaskDesc((obj.getString("task_desc")));
+                 item.setTaskTime(obj.getString("task_time"));
+                 item.setTaskLocation(obj.getString("task_location"));
+                 item.setTaskBudget(obj.getString("task_min_max_budget"));
+                 item.setImageResourceId(R.drawable.app_logo);
+                 item.setImageResourceId(R.drawable.app_logo);
+
+                 item.setIsfav(0);
+                 item.setIsturned(0);
+                 list.add(item);
+                 positions.put(parseInt(item.getTaskId()), i);
+             }
+         } catch (JSONException e) {
+             e.printStackTrace();
+         }
+
+
+         if (list.size() > 0) {
+             Collections.sort(list,new TaskComparatorByDate());
+             Collections.reverse(list);
+             TaskAdapter taskAdapter = new TaskAdapter(list);
+             recyclerView.setAdapter(taskAdapter);
+
+             recyclerView.setVisibility(View.VISIBLE);
+             fab.setVisibility(View.VISIBLE);
+
+             mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+             mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+             Log.i(TAG, "Bundle Arguments:" + getArguments());
+             if (getArguments() != null && "true".equals(getArguments().getString("notification")) && getArguments().getString("task") != null) {
+                 int taskId = Integer.parseInt(getArguments().getString("task"));
+                 if (positions.containsKey(taskId)) {
+                     recyclerView.setLayoutManager(new CustomLinearLayoutManagerWithSmoothScroller(getContext()));
+                     ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(positions.get(taskId), 0);
+                 }
+             }
+         } else {
+             recyclerView.setVisibility(View.INVISIBLE);
+             mErrorMessageDisplay.setVisibility(View.VISIBLE);
+             mLoadingIndicator.setVisibility(View.INVISIBLE);
+             fab.setVisibility(View.INVISIBLE);
+         }
+
+     }
+
+     @Override
+     public void onLoaderReset(Loader<String> loader) {
+
+     }
+ */
     class DeleteTaskWorker extends AsyncTask<String, Void, String> {
 
         String TAG = "MyTask.DeleteTaskWorker";
@@ -260,8 +376,8 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
 
             try {
                 String taskId = params[0];
-                Log.i(TAG,"Task Id:"+taskId);
-                if ((taskId==null || taskId.length()<=0)) {
+                Log.i(TAG, "Task Id:" + taskId);
+                if ((taskId == null || taskId.length() <= 0)) {
                     return "{\"code\":\"400\",\"message\":\"Invalid Task Id\"}";
                 }
                 Log.i(TAG, "Task to delete:" + taskId);

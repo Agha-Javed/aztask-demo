@@ -175,9 +175,7 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
                             jsonResult.append(line + "\n");
                         }
                         br.close();
-
                         result.put("response",jsonResult.toString());
-
                         return result;
                     } else {
                         Log.i(TAG, con.getResponseMessage());
@@ -215,8 +213,6 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
                 item.setTaskOwnerContact(obj.getString("contact"));
                 item.setTaskOwnerName(obj.getString("user"));
 
-                Log.i(TAG,"Task Owner Contact:"+item.getTaskOwnerContact());
-
                 item.setImageResourceId(R.drawable.app_logo);
                 item.setImageResourceId(R.drawable.app_logo);
 
@@ -227,7 +223,7 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if(list.size()>0 || "200".equals(result.get("status"))){
+        if(list.size()>0 && "200".equals(result.get("status"))){
             Collections.sort(list,new TaskComparatorByDate());
             Collections.reverse(list);
             TaskAdapter taskAdapter = new TaskAdapter(list);
@@ -240,9 +236,17 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
             mLoadingIndicator.setVisibility(View.INVISIBLE);
         }else{
             recyclerView.setVisibility(View.INVISIBLE);
-            mErrorMessageDisplay.setVisibility(View.VISIBLE);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
+            mErrorMessageDisplay.setVisibility(View.VISIBLE);
             fab.setVisibility(View.INVISIBLE);
+
+            if(list.size()==0){
+                Log.i(TAG,"JAVED:: THERE IS NO TASK.");
+                mErrorMessageDisplay.setText("new tasks have not been created in your area yet.");
+                fab.setVisibility(View.VISIBLE);
+
+            }
+
         }
 
     }

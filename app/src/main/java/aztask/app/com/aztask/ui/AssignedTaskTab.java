@@ -10,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.TaskCard;
@@ -43,7 +45,7 @@ import static android.R.attr.id;
 import static android.R.id.list;
 import static java.lang.Integer.parseInt;
 
-public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCallbacks<String> {
+public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCallbacks<Map<String,String>>  {
 
     private final String TAG = "AssignedTaskTab";
 
@@ -130,15 +132,16 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
     }
 
     @Override
-    public android.support.v4.content.Loader<String> onCreateLoader(int id, Bundle args) {
+    public Loader<Map<String, String>> onCreateLoader(int id, Bundle args) {
         mLoadingIndicator.setVisibility(View.VISIBLE);
+        final Map<String,String> result=new ConcurrentHashMap<>();
 
-        return new AsyncTaskLoader<String>(getContext()) {
+        return new AsyncTaskLoader<Map<String, String>>(getContext()) {
 
             @Override
-            public String loadInBackground() {
+            public Map<String, String> loadInBackground() {
                 Log.i(TAG, "Downloading assigned tasks.");
-                StringBuilder result = new StringBuilder("");
+                StringBuilder response = new StringBuilder("");
 
                 String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/assigned_tasks";
                 Log.d(TAG, "Link:" + link);
@@ -150,35 +153,37 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
                     con.setRequestProperty("Accept", "application/json");
 
                     int HttpResult = con.getResponseCode();
+                    result.put("status",""+HttpResult);
                     if (HttpResult == HttpURLConnection.HTTP_OK) {
                         BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
                         String line;
                         while ((line = br.readLine()) != null) {
-                            result.append(line).append("\n");
+                            response.append(line).append("\n");
                         }
                         br.close();
-                        Log.i(TAG, "Assigned Tasks List:" + result.toString());
+                        result.put("response",response.toString());
+                        return result;
                     }
-                    return result.toString();
+
                 } catch (Exception exception) {
                     Log.e(TAG, "Error:" + exception);
                     exception.printStackTrace();
                 }
 
-                return result.toString();
+                return result;
             }
 
         };
-
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<String> loader, String data) {
+    public void onLoadFinished(Loader<Map<String, String>> loader, Map<String, String> result) {
+
         mLoadingIndicator.setVisibility(View.INVISIBLE);
 
         List<TaskCard> list = new ArrayList<>();
         try {
-            JSONArray rootArray = new JSONArray(data);
+            JSONArray rootArray = new JSONArray(result.get("response"));
 
             int len = rootArray.length();
             for (int i = 0; i < len; i++) {
@@ -191,6 +196,8 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
 
                 item.setTaskLocation(obj.getString("task_location"));
                 item.setTaskBudget(obj.getString("task_min_max_budget"));
+                item.setTaskOwnerContact(obj.getString("contact"));
+                item.setTaskOwnerName(obj.getString("user"));
 
                 item.setImageResourceId(R.drawable.app_logo);
                 item.setImageResourceId(R.drawable.app_logo);
@@ -204,52 +211,46 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
         } catch (JSONException e) {
             e.printStackTrace();
         }
-            if(list.size()>0){
-                Collections.sort(list,new TaskComparatorByDate());
-                Collections.reverse(list);
-                TaskAdapter taskAdapter=new TaskAdapter(list);
-                mRecyclerView.setAdapter(taskAdapter);
-                mRecyclerView.setVisibility(View.VISIBLE);
-                fab.setVisibility(View.VISIBLE);
+        if(list.size()>0 && "200".equals(result.get("status"))){
+            Collections.sort(list,new TaskComparatorByDate());
+            Collections.reverse(list);
+            TaskAdapter taskAdapter=new TaskAdapter(list);
+            mRecyclerView.setAdapter(taskAdapter);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.VISIBLE);
 
-                mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
 
-                Log.i(TAG,"Bundle Arguments:"+getArguments());
-                if(getArguments()!=null && "true".equals(getArguments().getString("notification")) && getArguments().getString("task")!=null){
-                    int taskId=Integer.parseInt(getArguments().getString("task"));
-                    if(positions.containsKey(taskId)){
-                        mRecyclerView.setLayoutManager(new CustomLinearLayoutManagerWithSmoothScroller(getContext()));
-                        ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(positions.get(taskId), 0);
-                    }
+            Log.i(TAG,"Bundle Arguments:"+getArguments());
+            if(getArguments()!=null && "true".equals(getArguments().getString("notification")) && getArguments().getString("task")!=null){
+                int taskId=Integer.parseInt(getArguments().getString("task"));
+                if(positions.containsKey(taskId)){
+                    mRecyclerView.setLayoutManager(new CustomLinearLayoutManagerWithSmoothScroller(getContext()));
+                    ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(positions.get(taskId), 0);
                 }
-
-            }else{
-                mRecyclerView.setVisibility(View.INVISIBLE);
-                mErrorMessageDisplay.setVisibility(View.VISIBLE);
-                fab.setVisibility(View.INVISIBLE);
             }
 
-
-/*
-            if(getArguments()!=null && "true".equals(getArguments().getString("notification")) && getArguments().getInt("task")>0 && positions.containsKey(getArguments().getInt("task"))){
-                Log.i(TAG,"Scrollogin to particular position, registration");
-             //   mRecyclerView.scrollToPosition(getArguments().getInt("task"));
-
+        }else{
+            mRecyclerView.setVisibility(View.INVISIBLE);
+            mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.INVISIBLE);
+            if(list.size()==0){
+                mErrorMessageDisplay.setText("no tasks have been created in your skills category.");
+                fab.setVisibility(View.VISIBLE);
             }
-*/
 
-
+        }
 
     }
 
     @Override
-    public void onLoaderReset(android.support.v4.content.Loader<String> loader) {
+    public void onLoaderReset(Loader<Map<String, String>> loader) {
 
     }
 
     class UnAssignTaskWorker extends AsyncTask<String, Void, String> {
 
-        String TAG = "MyTasksTab.UnAssignTaskWorker";
+        String TAG = "AT.UnAssignTaskWorker";
 
         @Override
         protected String doInBackground(String... params) {

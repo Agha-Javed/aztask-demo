@@ -42,7 +42,6 @@
             android:layout_marginRight="5dp"
             android:ems="10"
             android:hint="What do you want?"
-            android:imeOptions="actionDone"
             android:inputType="textMultiLine"
             android:textColorHint="#BDBDBD"
             android:textCursorDrawable="@null" />
@@ -97,7 +96,7 @@
                 android:ems="10"
                 android:hint="Min $"
                 android:imeOptions="actionDone"
-                android:inputType="textMultiLine"
+                android:inputType="number"
                 android:textColorHint="#BDBDBD"
                 android:textCursorDrawable="@null"
                 android:gravity="center"/>
@@ -112,7 +111,7 @@
                 android:ems="10"
                 android:hint="Max $"
                 android:imeOptions="actionDone"
-                android:inputType="textMultiLine"
+                android:inputType="number"
                 android:textColorHint="#BDBDBD"
                 android:textCursorDrawable="@null"
                 android:gravity="center"/>

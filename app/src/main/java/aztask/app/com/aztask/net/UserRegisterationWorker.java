@@ -1,3 +1,4 @@
+/*
 package aztask.app.com.aztask.net;
 
 import java.io.BufferedReader;
@@ -120,3 +121,4 @@ public class UserRegisterationWorker extends AsyncTask<User, Void, String> {
 //		return null;
 //	}
 }
+*/

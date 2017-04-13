@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import static aztask.app.com.aztask.R.id.btnCall;
+import static aztask.app.com.aztask.R.id.msg;
 import static aztask.app.com.aztask.R.id.tvUserName;
 
 
@@ -56,7 +57,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         String taskLocation=list.get(position).getTaskLocation();
 
         String taskMetaData="Budget:"+minBudget+"RM to "+maxBudget+"RM";
-        taskMetaData+="\nLocation:"+taskLocation;
+        taskMetaData+="\nLocation:"+Util.shortenText(taskLocation);
 
         holder.tvTaskMetaData.setText(taskMetaData);
 
@@ -65,8 +66,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         if(list.get(position).getTaskOwnerContact()!=null){
             holder.ivCall.setTag(list.get(position).getTaskOwnerContact());
-            holder.ivMsg.setTag(list.get(position).getTaskOwnerContact());
-            holder.tvUserName.append(list.get(position).getTaskOwnerName());
+            //holder.ivMsg.setTag(list.get(position).getTaskOwnerContact());
+            holder.ivMsg.setTag(R.id.tvUserName,list.get(position).getTaskOwnerName());
+            holder.ivMsg.setTag(R.id.phone,list.get(position).getTaskOwnerContact());
+
+            holder.tvUserName.setText("created by:"+list.get(position).getTaskOwnerName());
             holder.ivCall.setVisibility(View.VISIBLE);
             holder.ivMsg.setVisibility(View.VISIBLE);
             holder.tvUserName.setVisibility(View.VISIBLE);
@@ -86,8 +90,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             holder.likeImageView.setImageResource(R.drawable.ic_like);
 
         }
-
-
 
         holder.itemView.setTag(list.get(position).getTaskId());
     }
@@ -128,14 +130,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
             tvUserName = (TextView) v.findViewById(R.id.tvUserName);
 
-            ivMsg= (ImageView) v.findViewById(R.id.msg);
+            ivMsg= (ImageView) v.findViewById(msg);
             ivMsg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Hi Javed,");
-                    sendIntent.putExtra("address",""+ivMsg.getTag());
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Hi "+ivMsg.getTag(R.id.tvUserName)+",");
+                    sendIntent.putExtra("address",""+ivMsg.getTag(R.id.phone));
                     sendIntent.setType("text/plain");
                     sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     MainActivity.getAppContext().startActivity(sendIntent);
