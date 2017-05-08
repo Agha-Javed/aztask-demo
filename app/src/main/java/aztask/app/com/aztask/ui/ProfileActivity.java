@@ -104,7 +104,7 @@ public class ProfileActivity extends AppCompatActivity implements LoaderManager.
 
             @Override
             public String loadInBackground() {
-                Log.i("TasksDownloaderWorker", "Requesting User Profile.");
+                Log.i("NearbyTasksDownloader", "Requesting User Profile.");
 
                 StringBuilder result = new StringBuilder("");
                 try {

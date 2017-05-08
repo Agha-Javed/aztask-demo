@@ -3,11 +3,16 @@ package aztask.app.com.aztask.ui;
 import org.json.JSONObject;
 
 import aztask.app.com.aztask.R;
+import aztask.app.com.aztask.data.AZTaskContract;
 import aztask.app.com.aztask.data.DeviceInfo;
 import aztask.app.com.aztask.data.Task;
+import aztask.app.com.aztask.data.User;
 import aztask.app.com.aztask.net.CreateTaskWorker;
+import aztask.app.com.aztask.service.DataLoadingService;
 import aztask.app.com.aztask.util.Util;
 
+import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -15,6 +20,7 @@ import android.graphics.PorterDuff;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -30,8 +36,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import static aztask.app.com.aztask.R.id.minBudget;
 
@@ -178,7 +187,7 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
                 DeviceInfo deviceInfo = new DeviceInfo();
                 deviceInfo.setDeviceId(Util.getDeviceId());
 
-                Location location = Util.getDeviceLocation();
+                Location location = Util.getDeviceLocation(getApplicationContext());
                 deviceInfo.setLatitude("" + location.getLatitude());
                 deviceInfo.setLongitude("" + location.getLongitude());
                 deviceInfo.setDeviceId(Util.getDeviceId());
@@ -187,6 +196,48 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
 
                 Log.i("MainActivity", "Task Object:" + task);
                 try {
+
+                    ContentValues contentValues = new ContentValues();
+
+                    Random r = new Random();
+                    int randomTaskId = (r.nextInt(500) + 1000);
+
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_ID,randomTaskId);
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_DESC,task.getTaskDesc());
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_CATEGORY,task.getTaskCategories());
+
+                    Calendar calendar = Calendar.getInstance();
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_TIME,sdf.format(new Date(calendar.getTimeInMillis())));
+
+
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_LOCATION,task.getTaskLocation());
+
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_MIN_MAX_BUDGET,task.getTask_min_max_budget());
+
+                    User registeredUser = MainActivity.getRegisteredUser();
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_OWNER_CONTACT,registeredUser.getUserMobile());
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_OWNER_NAME,registeredUser.getUserName());
+                    contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_LIKED,"false");
+
+
+                    Uri nearByTaskURI = MainActivity.getAppContext().getContentResolver().insert(AZTaskContract.NEARBY_TASKS_CONTENT_URI, contentValues);
+
+                    Uri myTaskURI = MainActivity.getAppContext().getContentResolver().insert(AZTaskContract.MY_TASKS_CONTENT_URI, contentValues);
+
+                    if(nearByTaskURI!=null){
+                        new CreateTaskWorker().execute(task);
+                        Log.i("Create Task Activity", "Task has been created:");
+                        Toast.makeText(getApplicationContext(), "Task has been created.",
+                                Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+
+                    }
+
+/*
                     String response = new CreateTaskWorker().execute(task).get();
                     JSONObject responseObj = new JSONObject(response);
                     int responseCode = (responseObj.getString("code") != null && responseObj.getString("code").length() > 0) ? Integer.parseInt(responseObj.getString("code")) : 400;
@@ -200,6 +251,9 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
                         startActivity(intent);
 
                     }
+*/
+
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

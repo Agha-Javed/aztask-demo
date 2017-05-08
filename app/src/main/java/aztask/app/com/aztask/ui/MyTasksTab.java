@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import aztask.app.com.aztask.R;
+import aztask.app.com.aztask.data.AZTaskContract;
 import aztask.app.com.aztask.data.DeviceInfo;
 import aztask.app.com.aztask.data.Task;
 import aztask.app.com.aztask.data.TaskCard;
@@ -24,7 +25,11 @@ import aztask.app.com.aztask.ui.MainActivity;
 import aztask.app.com.aztask.ui.UserRegisterationActivity;
 import aztask.app.com.aztask.util.Util;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -32,6 +37,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -54,16 +60,18 @@ import static android.R.id.list;
 import static android.R.id.message;
 import static aztask.app.com.aztask.R.id.fab;
 import static java.lang.Integer.parseInt;
+import static java.security.AccessController.getContext;
 
-public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallbacks<Map<String, String>> {
+public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final String TAG = "MyTasksTab";
 
     private ArrayList<TaskCard> tasksList = new ArrayList<TaskCard>();
-    Map<Integer, Integer> positions;
+    Map<Integer, Integer> positions=new HashMap<>();
 
     private RecyclerView recyclerView;
-    private TaskAdapter taskAdapter;
+    private CursorTaskAdapter taskAdapter;
+    private Cursor myTasksCursor;
     private FloatingActionButton fab;
 
 
@@ -85,7 +93,9 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
 
         View view = inflater.inflate(R.layout.mytasks_fragment, container, false);
 
+        taskAdapter=new CursorTaskAdapter(Util.MY_TASKS_TAB,getContext(),myTasksCursor);
         recyclerView = (RecyclerView) view.findViewById(R.id.mytasks_cardView);
+        recyclerView.setAdapter(taskAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
@@ -105,7 +115,8 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                 // COMPLETED (1) Construct the URI for the item to delete
                 //[Hint] Use getTag (from the adapter code) to get the id of the swiped item
                 // Retrieve the id of the task to delete
-                String taskId = (String) viewHolder.itemView.getTag();
+                //String taskId = (String) viewHolder.itemView.getTag();
+                String taskId =(String) viewHolder.itemView.getTag();
                 Log.i(TAG, "Task " + taskId + " is gonna be deleted.");
 
                 new DeleteTaskWorker().execute(taskId);
@@ -144,6 +155,59 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
     }
 
     @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        return new CursorLoader(getContext(),AZTaskContract.MY_TASKS_CONTENT_URI,null,null,null,null);
+        //return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.i(TAG,"javed:: curser data loaded:"+data.getCount());
+        this.myTasksCursor=data;
+        this.taskAdapter.changeCursor(data);
+
+
+        if (data!=null && data.getCount()>0) {
+            recyclerView.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.VISIBLE);
+
+            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+/*
+            Log.i(TAG, "Bundle Arguments:" + getArguments());
+            if (getArguments() != null && "true".equals(getArguments().getString("notification")) && getArguments().getString("task") != null) {
+                int taskId = Integer.parseInt(getArguments().getString("task"));
+                if (positions.containsKey(taskId)) {
+                    recyclerView.setLayoutManager(new CustomLinearLayoutManagerWithSmoothScroller(getContext()));
+                    ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(positions.get(taskId), 0);
+                }
+            }
+*/
+
+        } else {
+            recyclerView.setVisibility(View.INVISIBLE);
+            mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            fab.setVisibility(View.INVISIBLE);
+
+            if(data.getCount()==0){
+                mErrorMessageDisplay.setText("You have not created any task yet.");
+                fab.setVisibility(View.VISIBLE);
+            }
+
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        this.taskAdapter.swapCursor(null);
+    }
+
+
+   /*
+    @Override
     public Loader<Map<String, String>> onCreateLoader(int id, Bundle args) {
         mLoadingIndicator.setVisibility(View.VISIBLE);
         final Map<String, String> result = new ConcurrentHashMap<>();
@@ -154,12 +218,23 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
             @Override
             public Map<String, String> loadInBackground() {
 
-                Log.i("MyTasksDownloadWorker", "Downloading my tasks.");
+                Cursor cursor = MainActivity.getAppContext().getContentResolver().query(AZTaskContract.MY_TASKS_CONTENT_URI, null, null, null, null);
+                if(cursor.getCount()>0 && cursor.moveToNext()){
+                    Log.d(TAG, "JAVED::DATA AVAILABLE IN DB.");
+                    String jsonResponse= cursor.getString(cursor.getColumnIndex(AZTaskContract.MyTaskEntry.COLUMN_NAME_DATA));
+                    result.put("status","200");
+                    result.put("response",jsonResponse);
+                    return result;
+                }
+
+                Log.i("MyTasksDownloader", "Downloading my tasks.");
                 String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/tasks";
                 StringBuilder response = new StringBuilder("");
 
                 try {
                     Log.d(TAG, "Link:" + link);
+
+
 
                     URL url = new URL(link);
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -239,7 +314,14 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                     ((LinearLayoutManager) recyclerView.getLayoutManager()).scrollToPositionWithOffset(positions.get(taskId), 0);
                 }
             }
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(AZTaskContract.MyTaskEntry.COLUMN_NAME_DATA, result.get("response"));
+            MainActivity.getAppContext().getContentResolver().insert(AZTaskContract.MY_TASKS_CONTENT_URI, contentValues);
+
         } else {
+
+
             recyclerView.setVisibility(View.INVISIBLE);
             mErrorMessageDisplay.setVisibility(View.VISIBLE);
             mLoadingIndicator.setVisibility(View.INVISIBLE);
@@ -257,7 +339,7 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
     @Override
     public void onLoaderReset(Loader<Map<String, String>> loader) {
 
-    }
+    }*/
 
     /* @Override
      public Loader<String> onCreateLoader(int id, Bundle args) {
@@ -270,7 +352,7 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
              @Override
              public String loadInBackground() {
 
-                 Log.i("MyTasksDownloadWorker", "Downloading my tasks.");
+                 Log.i("MyTasksDownloader", "Downloading my tasks.");
                  String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/tasks";
                  StringBuilder result = new StringBuilder("");
 
@@ -381,6 +463,10 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                     return "{\"code\":\"400\",\"message\":\"Invalid Task Id\"}";
                 }
                 Log.i(TAG, "Task to delete:" + taskId);
+                Uri deleteURI = ContentUris.withAppendedId(AZTaskContract.MY_TASKS_CONTENT_URI, Integer.parseInt(taskId));
+                Log.i(TAG, "delete: URI" + taskId);
+                getContext().getContentResolver().delete(deleteURI,null,null);
+
 
                 String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/task/" + taskId + "/delete";
                 Log.d(TAG, "Link:" + link);

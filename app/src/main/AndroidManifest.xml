@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <permission
         android:name="com.app.aztask.permission.C2D_MESSAGE"
@@ -90,6 +91,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".broadcast.RebootNotificationRecciver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name="aztask.app.com.aztask.service.AZTaskGcmListenerService"
             android:exported="false">
@@ -114,6 +122,7 @@
             </intent-filter>
         </service>
 
+
         <service
             android:name="aztask.app.com.aztask.service.TaskNotificationService"
             android:exported="false">
@@ -121,6 +130,16 @@
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
+
+        <service
+            android:name="aztask.app.com.aztask.service.DataLoadingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="aztask.app.com.aztask.service.load.data" />
+            </intent-filter>
+        </service>
+
+
         <receiver android:name="aztask.app.com.aztask.broadcast.NotificationReceiver">
 
         <intent-filter>
@@ -133,6 +152,11 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <provider
+            android:authorities="com.aztask.app"
+            android:name=".data.AZTaskContentProvider"
+            android:exported="false"/>
 
     </application>
 

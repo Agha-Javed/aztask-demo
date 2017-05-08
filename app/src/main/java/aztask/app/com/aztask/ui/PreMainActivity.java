@@ -1,36 +1,47 @@
 package aztask.app.com.aztask.ui;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Calendar;
+
 import aztask.app.com.aztask.R;
+import aztask.app.com.aztask.service.DataLoadingService;
+import aztask.app.com.aztask.util.Util;
 
 public class PreMainActivity extends AppCompatActivity {
+
+    private static String TAG="PreMainActivity";
 
     private static final int FINE_LOCATION_ACCESS_PERMISSION_CONSTANT = 100;
     private static final int ENABLE_FINE_LOCATION_CONSTANT = 101;
     private CardView locationErrorView;
-    TextView errorName;
-    TextView errorMsg;
-    TextView errorButton;
+    private TextView errorName;
+    private TextView errorMsg;
+    private TextView errorButton;
 
 
     @Override
@@ -54,6 +65,27 @@ public class PreMainActivity extends AppCompatActivity {
                 startActivityForResult(intent, FINE_LOCATION_ACCESS_PERMISSION_CONSTANT);
             }
         });
+
+
+
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!sharedPreferences.contains(Util.PREF_KEY_DATA_LOADING_SERVICE)) {
+            Log.d(TAG,"Scheduling Data Synch Service.");
+            scheduleDataLoaderService();
+
+        }
+
+        /*else{
+            AlarmManager am = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            Intent serviceIntent = new Intent(getApplicationContext(), DataLoadingService.class);
+            PendingIntent servicePendingIntent =
+                    PendingIntent.getService(getApplicationContext(),
+                            DataLoadingService.SERVICE_ID, // integer constant used to identify the service
+                            serviceIntent,
+                            PendingIntent.FLAG_CANCEL_CURRENT);
+            am.cancel(servicePendingIntent);
+        }*/
 
     }
 
@@ -172,11 +204,40 @@ public class PreMainActivity extends AppCompatActivity {
     private class OnClickNetworkListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            if(isNetworkAvailable()){
+            if (isNetworkAvailable()) {
                 locationErrorView.setVisibility(View.INVISIBLE);
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
             }
         }
     }
+
+
+    private void scheduleDataLoaderService() {
+
+        Context ctx = getApplicationContext();
+/** this gives us the time for the first trigger.  */
+        Calendar cal = Calendar.getInstance();
+        AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        long interval = 1000 * 60 * 2; // 5 minutes in milliseconds
+        Intent serviceIntent = new Intent(ctx, DataLoadingService.class);
+        serviceIntent.setAction("aztask.app.com.aztask.service.load.data");
+// make sure you **don't** use *PendingIntent.getBroadcast*, it wouldn't work
+        PendingIntent servicePendingIntent =
+                PendingIntent.getService(ctx,
+                        DataLoadingService.SERVICE_ID, // integer constant used to identify the service
+                        serviceIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT);  // FLAG to avoid creating a second service if there's already one running
+// there are other options like setInexactRepeating, check the docs
+        am.setRepeating(
+                AlarmManager.RTC_WAKEUP,//type of alarm. This one will wake up the device when it goes off, but there are others, check the docs
+                cal.getTimeInMillis()+interval,
+                interval,
+                servicePendingIntent
+        );
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.edit().putString(Util.PREF_KEY_DATA_LOADING_SERVICE, "true").apply();
+    }
+
 }

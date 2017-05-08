@@ -1,6 +1,8 @@
 package aztask.app.com.aztask.service;
 
 import aztask.app.com.aztask.R;
+import aztask.app.com.aztask.net.AssignedTasksDownloader;
+import aztask.app.com.aztask.net.MyTasksDownloader;
 import aztask.app.com.aztask.ui.MainActivity;
 import aztask.app.com.aztask.ui.ProfileActivity;
 import aztask.app.com.aztask.ui.UserRegisterationActivity;
@@ -57,9 +59,11 @@ public class AZTaskGcmListenerService extends GcmListenerService {
 
         if ("assigned".equalsIgnoreCase(data.getString("action"))) {
             Log.i("GcmListenerService","setting unassigned action");
+            new AssignedTasksDownloader(getApplicationContext()).execute();
             noBuilder.addAction(ignoreAction(this));
             notificationManager.notify(BROADCAST_NO_ACTION_CODE, noBuilder.build()); //0 = ID of notification
         } else {
+//            new MyTasksDownloader().execute();
             noBuilder.addAction(viewUserAction(this,data)); // #0
             noBuilder.addAction(ignoreAction(this));
             notificationManager.notify(BROADCAST_VIEW_USER_CODE, noBuilder.build()); //0 = ID of notification

@@ -20,6 +20,8 @@ import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 public class Util {
 
     //public static String SERVER_URL="http://10.1.19.31:9000";
@@ -40,9 +42,15 @@ public class Util {
 
     public static final String PREF_KEY_USER = "PREF_KEY_USER";
 
+    public static final String PREF_KEY_DATA_LOADING_SERVICE="PREF_KEY_DATA_LOADING_SERVICE";
+
     public static final int NEARBY_TASKS_TAB_POSITION = 0;
     public static final int ASSIGNED_TASKS_TAB_POSITION = 1;
     public static final int MY_TASKS_TAB_POSITION = 2;
+
+    public static final int NEARBY_TASKS_TAB=0;
+    public static final int ASSIGNED_TASKS_TAB=1;
+    public static final int MY_TASKS_TAB=2;
 
 
     public static String getDeviceId() {
@@ -60,9 +68,23 @@ public class Util {
         return deviceId;
     }
 
-    public static Location getDeviceLocation() {
+    public static String prepareRequestForNearbyTasks(Context context) {
+        try {
+            final JSONObject request = new JSONObject();
+            Location location = Util.getDeviceLocation(context);
+            request.put("latitude", "" + location.getLatitude());
+            request.put("longitude", "" + location.getLongitude());
+            request.put("userId", MainActivity.getUserId());
+            return request.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getAppContext());
+        return "";
+    }
+    public static Location getDeviceLocation(Context context) {
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         Location location = null;
         if (sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, "") != null && sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, "").length()>0) {
             String deviceLoc=sharedPreferences.getString(Util.PREF_KEY_DEVICE_CURRENT_LOCATION, "");

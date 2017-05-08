@@ -1,7 +1,11 @@
 package aztask.app.com.aztask.ui;
 
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +42,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import aztask.app.com.aztask.R;
+import aztask.app.com.aztask.data.AZTaskContract;
+import aztask.app.com.aztask.data.AZTaskDbHelper;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.data.TaskComparatorByDate;
 import aztask.app.com.aztask.util.Util;
@@ -45,12 +52,13 @@ import static android.R.attr.id;
 import static android.R.id.list;
 import static java.lang.Integer.parseInt;
 
-public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCallbacks<Map<String,String>>  {
+public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>  {
 
     private final String TAG = "AssignedTaskTab";
 
     private RecyclerView mRecyclerView;
-    private TaskAdapter mTaskAdapter;
+    private CursorTaskAdapter taskAdapter;
+    private Cursor myTasksCursor;
     private FloatingActionButton fab;
 
     private final int ASSIGNED_TASKS_LOADER_ID = 20;
@@ -90,11 +98,14 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
         });
 
 
+        taskAdapter=new CursorTaskAdapter(Util.ASSIGNED_TASKS_TAB,getContext(),myTasksCursor);
+
         mRecyclerView = (RecyclerView) view.findViewById(R.id.assigned_tasks_cardView);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(taskAdapter);
 
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -132,6 +143,56 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
     }
 
     @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+        return new CursorLoader(getContext(),AZTaskContract.ASSIGNED_TASKS_CONTENT_URI,null,null,null,null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.i(TAG,"javed:: curser data loaded:"+data.getCount());
+        this.myTasksCursor=data;
+        this.taskAdapter.changeCursor(data);
+
+        if(data!=null && data.getCount()>0){
+            mRecyclerView.setAdapter(taskAdapter);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.VISIBLE);
+
+            mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+/*
+            Log.i(TAG,"Bundle Arguments:"+getArguments());
+            if(getArguments()!=null && "true".equals(getArguments().getString("notification")) && getArguments().getString("task")!=null){
+                int taskId=Integer.parseInt(getArguments().getString("task"));
+                if(positions.containsKey(taskId)){
+                    mRecyclerView.setLayoutManager(new CustomLinearLayoutManagerWithSmoothScroller(getContext()));
+                    ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(positions.get(taskId), 0);
+                }
+            }
+*/
+
+
+        }else{
+            mRecyclerView.setVisibility(View.INVISIBLE);
+            mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.INVISIBLE);
+            if(data==null || data.getCount()==0){
+                mErrorMessageDisplay.setText("no tasks have been created in your skills category.");
+                fab.setVisibility(View.VISIBLE);
+            }
+
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        this.taskAdapter.swapCursor(null);
+    }
+
+    /*@Override
     public Loader<Map<String, String>> onCreateLoader(int id, Bundle args) {
         mLoadingIndicator.setVisibility(View.VISIBLE);
         final Map<String,String> result=new ConcurrentHashMap<>();
@@ -142,6 +203,17 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
             public Map<String, String> loadInBackground() {
                 Log.i(TAG, "Downloading assigned tasks.");
                 StringBuilder response = new StringBuilder("");
+
+
+                Cursor cursor = MainActivity.getAppContext().getContentResolver().query(AZTaskContract.ASSIGNED_TASKS_CONTENT_URI, null, null, null, null);
+                if(cursor.getCount()>0 && cursor.moveToNext()){
+                    Log.d(TAG, "JAVED::DATA AVAILABLE IN DB.");
+                    String jsonResponse= cursor.getString(cursor.getColumnIndex(AZTaskContract.AssignedTaskEntry.COLUMN_NAME_DATA));
+                    result.put("status","200");
+                    result.put("response",jsonResponse);
+                    return result;
+                }
+
 
                 String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/assigned_tasks";
                 Log.d(TAG, "Link:" + link);
@@ -230,6 +302,9 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
                 }
             }
 
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(AZTaskContract.AssignedTaskEntry.COLUMN_NAME_DATA, result.get("response"));
+            MainActivity.getAppContext().getContentResolver().insert(AZTaskContract.ASSIGNED_TASKS_CONTENT_URI, contentValues);
         }else{
             mRecyclerView.setVisibility(View.INVISIBLE);
             mErrorMessageDisplay.setVisibility(View.VISIBLE);
@@ -241,13 +316,17 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
 
         }
 
+
+
+
+
     }
 
     @Override
     public void onLoaderReset(Loader<Map<String, String>> loader) {
 
     }
-
+*/
     class UnAssignTaskWorker extends AsyncTask<String, Void, String> {
 
         String TAG = "AT.UnAssignTaskWorker";
@@ -263,6 +342,9 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
                     return "{\"code\":\"400\",\"message\":\"Invalid Task Id\"}";
                 }
                 Log.i(TAG, "Task to delete:" + taskId);
+
+                Uri deleteURI = ContentUris.withAppendedId(AZTaskContract.ASSIGNED_TASKS_CONTENT_URI, Integer.parseInt(taskId));
+                getContext().getContentResolver().delete(deleteURI,null,null);
 
                 String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/task/" + taskId + "/unassign_task";
                 Log.d(TAG, "Link:" + link);

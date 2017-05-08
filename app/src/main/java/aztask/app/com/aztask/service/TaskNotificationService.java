@@ -5,11 +5,19 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import aztask.app.com.aztask.data.AZTaskContract;
 import aztask.app.com.aztask.util.Util;
 
 import android.app.IntentService;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
+
+import static android.R.attr.action;
+import static android.R.attr.id;
 
 public class TaskNotificationService extends IntentService {
 
@@ -29,6 +37,30 @@ public class TaskNotificationService extends IntentService {
             String action = intent.getStringExtra("action");
             int userId = intent.getIntExtra("userId", 0);
             int taskId = intent.getIntExtra("taskId", 0);
+
+            int attachedTab=intent.getIntExtra("attachedTab", 0);
+
+            ContentValues cv = new ContentValues();
+            if("likeTask".equals(action)){
+                cv.put("is_task_liked","true");
+            }else{
+                cv.put("is_task_liked","false");
+            }
+            switch (attachedTab){
+                case Util.NEARBY_TASKS_TAB:{
+                    Uri taskURI = ContentUris.withAppendedId(AZTaskContract.NEARBY_TASKS_CONTENT_URI, taskId);
+                    getContentResolver().update(taskURI,cv,null,null);
+                }break;
+                case Util.ASSIGNED_TASKS_TAB:{
+                    Uri taskURI = ContentUris.withAppendedId(AZTaskContract.ASSIGNED_TASKS_CONTENT_URI, taskId);
+                    getContentResolver().update(taskURI,cv,null,null);
+                }break;
+                case Util.MY_TASKS_TAB:{
+                    Uri taskURI = ContentUris.withAppendedId(AZTaskContract.MY_TASKS_CONTENT_URI, taskId);
+                    getContentResolver().update(taskURI,cv,null,null);
+                }break;
+            }
+
 
 
             String link = Util.SERVER_URL + "/user/" + userId + "/"+action+"/" + taskId;

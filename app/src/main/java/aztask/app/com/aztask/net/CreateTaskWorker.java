@@ -10,9 +10,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import aztask.app.com.aztask.data.Task;
+import aztask.app.com.aztask.service.DataLoadingService;
 import aztask.app.com.aztask.ui.MainActivity;
 import aztask.app.com.aztask.util.Util;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -74,6 +76,12 @@ public class CreateTaskWorker extends AsyncTask<Task, Void, String>{
 	@Override
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);
+/*
+		Intent intentService = new Intent(MainActivity.getAppContext(), DataLoadingService.class);
+		intentService.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		intentService.setAction("aztask.app.com.aztask.service.load.data");
+		MainActivity.getAppContext().startService(intentService);
+*/
 	}
 	
 	private String prepareCreateTaskRequest(Task task) {
