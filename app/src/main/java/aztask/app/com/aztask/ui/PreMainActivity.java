@@ -72,7 +72,7 @@ public class PreMainActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (!sharedPreferences.contains(Util.PREF_KEY_DATA_LOADING_SERVICE)) {
             Log.d(TAG,"Scheduling Data Synch Service.");
-            scheduleDataLoaderService();
+            Util.scheduleDataLoaderService(getApplicationContext());
 
         }
 
@@ -210,34 +210,6 @@ public class PreMainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         }
-    }
-
-
-    private void scheduleDataLoaderService() {
-
-        Context ctx = getApplicationContext();
-/** this gives us the time for the first trigger.  */
-        Calendar cal = Calendar.getInstance();
-        AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        long interval = 1000 * 60 * 2; // 5 minutes in milliseconds
-        Intent serviceIntent = new Intent(ctx, DataLoadingService.class);
-        serviceIntent.setAction("aztask.app.com.aztask.service.load.data");
-// make sure you **don't** use *PendingIntent.getBroadcast*, it wouldn't work
-        PendingIntent servicePendingIntent =
-                PendingIntent.getService(ctx,
-                        DataLoadingService.SERVICE_ID, // integer constant used to identify the service
-                        serviceIntent,
-                        PendingIntent.FLAG_CANCEL_CURRENT);  // FLAG to avoid creating a second service if there's already one running
-// there are other options like setInexactRepeating, check the docs
-        am.setRepeating(
-                AlarmManager.RTC_WAKEUP,//type of alarm. This one will wake up the device when it goes off, but there are others, check the docs
-                cal.getTimeInMillis()+interval,
-                interval,
-                servicePendingIntent
-        );
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferences.edit().putString(Util.PREF_KEY_DATA_LOADING_SERVICE, "true").apply();
     }
 
 }

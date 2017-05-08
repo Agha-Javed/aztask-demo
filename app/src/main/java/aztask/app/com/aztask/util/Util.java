@@ -10,9 +10,13 @@ import java.util.UUID;
 
 
 import aztask.app.com.aztask.data.User;
+import aztask.app.com.aztask.service.DataLoadingService;
 import aztask.app.com.aztask.ui.MainActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
@@ -159,6 +163,31 @@ public class Util {
             }
         }
         return text;
+    }
+
+
+    public static void scheduleDataLoaderService(Context ctx) {
+
+        Calendar cal = Calendar.getInstance();
+        AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+        long interval = 1000 * 60 * 5; // 5 minutes in milliseconds
+        Intent serviceIntent = new Intent(ctx, DataLoadingService.class);
+        serviceIntent.setAction("aztask.app.com.aztask.service.load.data");
+
+        PendingIntent servicePendingIntent =
+                PendingIntent.getService(ctx,
+                        DataLoadingService.SERVICE_ID, // integer constant used to identify the service
+                        serviceIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT);  // FLAG to avoid creating a second service if there's already one running
+        am.setRepeating(
+                AlarmManager.RTC_WAKEUP,//type of alarm. This one will wake up the device when it goes off, but there are others, check the docs
+                cal.getTimeInMillis()+interval,
+                interval,
+                servicePendingIntent
+        );
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        sharedPreferences.edit().putString(Util.PREF_KEY_DATA_LOADING_SERVICE, "true").apply();
     }
 
 

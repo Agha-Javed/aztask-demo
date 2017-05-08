@@ -111,7 +111,7 @@ public class NearbyTasksDownloader extends AsyncTask<String, Void, String> {
 	protected void onPostExecute(final String result) {
 		super.onPostExecute(result);
 
-		Log.i(CLASS_NAME,"NearByTasks Downloader Result::"+result);
+		//Log.i(CLASS_NAME,"NearByTasks Downloader Result::"+result);
 		if(result!=null && result.trim().length()>0){
 
 

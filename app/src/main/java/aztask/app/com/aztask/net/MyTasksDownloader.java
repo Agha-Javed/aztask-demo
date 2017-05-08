@@ -100,7 +100,7 @@ public class MyTasksDownloader extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(final String result) {
         super.onPostExecute(result);
-        Log.i(CLASS_NAME, "User Registered Response:" + result.toString());
+      //  Log.i(CLASS_NAME, "User Registered Response:" + result.toString());
 
         if (result != null && result.trim().length() > 0) {
 

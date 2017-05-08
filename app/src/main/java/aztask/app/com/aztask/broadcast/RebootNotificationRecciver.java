@@ -23,41 +23,7 @@ import aztask.app.com.aztask.util.Util;
 public class RebootNotificationRecciver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("RebootNotiRecciver","JAVED:: reboot has been finished, deleting the key.");
-//        sharedPreferences.edit().remove(Util.PREF_KEY_DATA_LOADING_SERVICE).apply();
-        scheduleDataLoaderService(context);
-
-/*
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (sharedPreferences.contains(Util.PREF_KEY_DATA_LOADING_SERVICE)) {
-        }
-*/
-    }
-
-    private void scheduleDataLoaderService(Context ctx) {
-
-        //Context ctx = get();
-/** this gives us the time for the first trigger.  */
-        Calendar cal = Calendar.getInstance();
-        AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        long interval = 1000 * 60 * 10; // 5 minutes in milliseconds
-        Intent serviceIntent = new Intent(ctx, DataLoadingService.class);
-        serviceIntent.setAction("aztask.app.com.aztask.service.load.data");
-// make sure you **don't** use *PendingIntent.getBroadcast*, it wouldn't work
-        PendingIntent servicePendingIntent =
-                PendingIntent.getService(ctx,
-                        DataLoadingService.SERVICE_ID, // integer constant used to identify the service
-                        serviceIntent,
-                        PendingIntent.FLAG_CANCEL_CURRENT);  // FLAG to avoid creating a second service if there's already one running
-// there are other options like setInexactRepeating, check the docs
-        am.setRepeating(
-                AlarmManager.RTC_WAKEUP,//type of alarm. This one will wake up the device when it goes off, but there are others, check the docs
-                cal.getTimeInMillis()+interval,
-                interval,
-                servicePendingIntent
-        );
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        sharedPreferences.edit().putString(Util.PREF_KEY_DATA_LOADING_SERVICE, "true").apply();
+        Log.d("RebootNotiRecciver","JAVED:: reboot has been finished, sheduling synch service.");
+        Util.scheduleDataLoaderService(context);
     }
 }
