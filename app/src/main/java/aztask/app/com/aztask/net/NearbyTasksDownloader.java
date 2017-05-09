@@ -27,7 +27,7 @@ import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.ui.MainActivity;
 import aztask.app.com.aztask.util.Util;
 
-public class NearbyTasksDownloader extends AsyncTask<String, Void, String> {
+public class NearbyTasksDownloader extends AsyncTask<Void, Void, String> {
 
 	List<TaskCard> tasksList = new ArrayList<TaskCard>();
 	private String CLASS_NAME = "TasksDownloader";
@@ -49,18 +49,20 @@ public class NearbyTasksDownloader extends AsyncTask<String, Void, String> {
 	}
 
 	@Override
-	protected String doInBackground(String... params) {
+	protected String doInBackground(Void... params) {
 		Log.i("NearbyTasksDownloader", "Downloading nearby tasks.");
 		String link ="";
-		if(MainActivity.isUserRegistered())
+		if(Util.isUserRegistered(context))
 			link=Util.SERVER_URL + "/tasks/list/nearby";
 		else
 			link=Util.SERVER_URL + "/tasks/list/new";
 
+		Log.i("NearbyTasksDownloader", "URL:"+link);
+
 		StringBuilder result = new StringBuilder("");
 
 		try {
-			String downloadNearbyTasksRequest = params[0];// prepareDownloadNearByTasksRequest();//taskInfo.toString();
+			String downloadNearbyTasksRequest =Util.prepareRequestForNearbyTasks(context);// prepareDownloadNearByTasksRequest();//taskInfo.toString();
 
 			if (!(downloadNearbyTasksRequest != null) || !(downloadNearbyTasksRequest.length() > 0)) {
 				Log.i(CLASS_NAME, "The request is empty,so returning back.");
@@ -73,16 +75,13 @@ public class NearbyTasksDownloader extends AsyncTask<String, Void, String> {
 			con.setDoInput(true);
 			con.setRequestProperty("Accept", "application/json");
 
-			if (MainActivity.isUserRegistered()){
-				con.setRequestMethod("POST");
-				con.setRequestProperty("Content-Type", "application/json");
-				con.setDoOutput(true);
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Content-Type", "application/json");
+			con.setDoOutput(true);
 
-				OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-				wr.write(downloadNearbyTasksRequest);
-				wr.flush();
-
-			}
+			OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+			wr.write(downloadNearbyTasksRequest);
+			wr.flush();
 
 
 			int HttpResult = con.getResponseCode();

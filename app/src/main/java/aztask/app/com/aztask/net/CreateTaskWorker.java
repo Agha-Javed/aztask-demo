@@ -14,12 +14,17 @@ import aztask.app.com.aztask.service.DataLoadingService;
 import aztask.app.com.aztask.ui.MainActivity;
 import aztask.app.com.aztask.util.Util;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
 public class CreateTaskWorker extends AsyncTask<Task, Void, String>{
-	
+	private Context context;
+
+	public CreateTaskWorker(Context context){
+		this.context=context;
+	}
 	private String CLASS_NAME="CreateTaskWorker";
 	
 	@Override
@@ -29,7 +34,7 @@ public class CreateTaskWorker extends AsyncTask<Task, Void, String>{
 		try {
 			Task task = params[0];
 
-			String link =Util.SERVER_URL+"/user/"+MainActivity.getUserId()+"/createTask";
+			String link =Util.SERVER_URL+"/user/"+Util.getUserId(context)+"/createTask";
 
 			String registerationRequest = prepareCreateTaskRequest(task);
 

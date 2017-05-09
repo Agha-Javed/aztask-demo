@@ -4,14 +4,16 @@
     <string name="action_settings">CardViewTutorial</string>
     
         <string-array name="task_categories_arrays">
-        <item>Teaching</item>
-        <item>Programming</item>
-        <item>Food</item>
-        <item>Gym</item>
-        <item>Car Hire</item>
-        <item>Bike Hire</item>
+        <item>Health</item>
+        <item>Fashion</item>
         <item>Photography</item>
-        <item>Assignment</item>
+        <item>Teaching</item>
+        <item>Educational</item>
+        <item>IT</item>
+        <item>Food</item>
+        <item>Household</item>
+        <item>Transport</item>
+        <item>Other</item>
     </string-array>
     
 </resources>

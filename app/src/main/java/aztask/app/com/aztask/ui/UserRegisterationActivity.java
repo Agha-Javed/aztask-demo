@@ -108,7 +108,7 @@ public class UserRegisterationActivity extends AppCompatActivity implements Task
                 }
 
                 DeviceInfo deviceInfo = new DeviceInfo();
-                deviceInfo.setDeviceId(Util.getDeviceId());
+                deviceInfo.setDeviceId(Util.getDeviceId(getApplicationContext()));
 
                 Location location = Util.getDeviceLocation(getApplicationContext());
 

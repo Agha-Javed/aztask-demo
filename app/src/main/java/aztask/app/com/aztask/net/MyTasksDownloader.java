@@ -13,11 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import aztask.app.com.aztask.R;
 import aztask.app.com.aztask.data.AZTaskContract;
-import aztask.app.com.aztask.data.AZTaskDbHelper;
-import aztask.app.com.aztask.ui.CustomLinearLayoutManagerWithSmoothScroller;
-import aztask.app.com.aztask.ui.TaskAdapter;
 import aztask.app.com.aztask.data.TaskCard;
 import aztask.app.com.aztask.ui.MainActivity;
 import aztask.app.com.aztask.util.Util;
@@ -69,7 +65,7 @@ public class MyTasksDownloader extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
         Log.i("MyTasksDownloader", "Downloading my tasks.");
-        String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/tasks";
+        String link = Util.SERVER_URL + "/user/" + Util.getUserId(context) + "/tasks";
         StringBuilder result = new StringBuilder("");
 
         try {

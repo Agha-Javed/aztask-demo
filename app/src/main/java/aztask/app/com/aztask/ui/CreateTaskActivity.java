@@ -185,12 +185,12 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
 
 
                 DeviceInfo deviceInfo = new DeviceInfo();
-                deviceInfo.setDeviceId(Util.getDeviceId());
+                deviceInfo.setDeviceId(Util.getDeviceId(getApplicationContext()));
 
                 Location location = Util.getDeviceLocation(getApplicationContext());
                 deviceInfo.setLatitude("" + location.getLatitude());
                 deviceInfo.setLongitude("" + location.getLongitude());
-                deviceInfo.setDeviceId(Util.getDeviceId());
+                deviceInfo.setDeviceId(Util.getDeviceId(getApplicationContext()));
 
                 task.setDeviceInfo(deviceInfo);
 
@@ -215,7 +215,7 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
 
                     contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_MIN_MAX_BUDGET,task.getTask_min_max_budget());
 
-                    User registeredUser = MainActivity.getRegisteredUser();
+                    User registeredUser = Util.getRegisteredUser(getApplicationContext());
                     contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_OWNER_CONTACT,registeredUser.getUserMobile());
                     contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_OWNER_NAME,registeredUser.getUserName());
                     contentValues.put(AZTaskContract.NearByTaskEntry.COLUMN_NAME_TASK_LIKED,"false");
@@ -226,7 +226,7 @@ public class CreateTaskActivity extends AppCompatActivity implements TaskCategor
                     Uri myTaskURI = MainActivity.getAppContext().getContentResolver().insert(AZTaskContract.MY_TASKS_CONTENT_URI, contentValues);
 
                     if(nearByTaskURI!=null){
-                        new CreateTaskWorker().execute(task);
+                        new CreateTaskWorker(getApplicationContext()).execute(task);
                         Log.i("Create Task Activity", "Task has been created:");
                         Toast.makeText(getApplicationContext(), "Task has been created.",
                                 Toast.LENGTH_SHORT).show();

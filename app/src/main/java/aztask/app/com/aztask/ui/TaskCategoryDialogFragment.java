@@ -26,7 +26,7 @@ public class TaskCategoryDialogFragment extends DialogFragment {
     }
 
     private List<String> mSelectedItems;
-    private String[] taskCategoriesArray = {"Food", "Photography", "Educational", "Transport", "LifeStyle", "Entertainment", "Health", "Household", "Hobbies","Other"};
+    private String[] taskCategoriesArray = {"Health", "Fashion", "Photography", "Teaching", "Educational", "IT", "Food", "Household", "Transport","Other"};
     private NoticeDialogListener mListener;
 
     // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener

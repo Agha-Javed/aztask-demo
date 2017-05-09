@@ -10,7 +10,9 @@ import java.util.UUID;
 
 
 import aztask.app.com.aztask.data.User;
+import aztask.app.com.aztask.net.CheckUserRegisterationWorker;
 import aztask.app.com.aztask.service.DataLoadingService;
+import aztask.app.com.aztask.service.GCMRegistrationIntentService;
 import aztask.app.com.aztask.ui.MainActivity;
 
 import android.app.AlarmManager;
@@ -24,6 +26,8 @@ import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import org.json.JSONObject;
 
 public class Util {
@@ -33,6 +37,7 @@ public class Util {
 //    public static String SERVER_URL = "http://172.16.2.68:9000";
 
 
+    public static String TAG="Util";
     public static String SERVER_URL="http://aztask-demo.herokuapp.com";
     public static String PROJECT_NUMBER = "155962838252";
     public static final String REGISTRATION_SUCCESS = "RegistrationSuccess";
@@ -57,14 +62,14 @@ public class Util {
     public static final int MY_TASKS_TAB=2;
 
 
-    public static String getDeviceId() {
+    public static String getDeviceId(Context context) {
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.getAppContext());
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String deviceId = "";
         if (sharedPreferences.getString(Util.PREF_KEY_DEVICEID, "") != null && sharedPreferences.getString(Util.PREF_KEY_DEVICEID, "").length()>0) {
             deviceId = sharedPreferences.getString(Util.PREF_KEY_DEVICEID, "");
         } else {
-            String androidId = android.provider.Settings.Secure.getString(MainActivity.getAppContext().getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            String androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
             UUID deviceUuid = new UUID(androidId.hashCode(), ((long) androidId.hashCode() << 32));
             deviceId = deviceUuid.toString();
             sharedPreferences.edit().putString(Util.PREF_KEY_DEVICEID, deviceId).apply();
@@ -78,7 +83,7 @@ public class Util {
             Location location = Util.getDeviceLocation(context);
             request.put("latitude", "" + location.getLatitude());
             request.put("longitude", "" + location.getLongitude());
-            request.put("userId", MainActivity.getUserId());
+            request.put("userId", getUserId(context));
             return request.toString();
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,6 +91,16 @@ public class Util {
 
         return "";
     }
+
+    public static int getUserId(Context context) {
+        User loggedInUser=loadUser(context);
+        return (loggedInUser != null) ? loggedInUser.getUserId() : 0;
+    }
+
+    public static User getRegisteredUser(Context context) {
+        return loadUser(context);
+    }
+
     public static Location getDeviceLocation(Context context) {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -102,9 +117,9 @@ public class Util {
             location.setLatitude(Double.parseDouble(latitude));
             location.setLongitude(Double.parseDouble(longitude));
         } else {
-            if (MainActivity.isUserRegistered()) {
+            if (isUserRegistered(context)) {
                 Log.i("Util", "Location:Didn't get any location in preferences, so getting user's default location ");
-                User loggedInUser = MainActivity.getRegisteredUser();
+                User loggedInUser =getRegisteredUser(context);
                 location = new Location(LocationManager.GPS_PROVIDER);
                 location.setLatitude(Double.parseDouble(loggedInUser.getDeviceInfo().getLatitude()));
                 location.setLongitude(Double.parseDouble(loggedInUser.getDeviceInfo().getLongitude()));
@@ -157,8 +172,8 @@ public class Util {
 
     public static String shortenText(String text){
         if(text!=null && text.length()>0){
-            if(text.length()>50){
-                String trimmedText = text.substring(0, Math.min(text.length(), 40));
+            if(text.length()>40){
+                String trimmedText = text.substring(0, Math.min(text.length(), 30));
                 return trimmedText+"..";
             }
         }
@@ -170,7 +185,7 @@ public class Util {
 
         Calendar cal = Calendar.getInstance();
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        long interval = 1000 * 60 * 5; // 5 minutes in milliseconds
+        long interval = 1000 * 60 * 60; // 5 minutes in milliseconds
         Intent serviceIntent = new Intent(ctx, DataLoadingService.class);
         serviceIntent.setAction("aztask.app.com.aztask.service.load.data");
 
@@ -190,5 +205,65 @@ public class Util {
         sharedPreferences.edit().putString(Util.PREF_KEY_DATA_LOADING_SERVICE, "true").apply();
     }
 
+    public static User loadUser(Context context) {
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Gson gson = new Gson();
+        Log.i(TAG, "Device ID :" + getDeviceId(context));
+
+        User loggedInUser=null;
+
+        if (preferences.getString(Util.PREF_KEY_DEVICEID, "") != null && preferences.getString(Util.PREF_KEY_DEVICEID, "").length()>0) {
+            String userRefInJSONForm = preferences.getString(Util.PREF_KEY_USER, "");
+            if (userRefInJSONForm != null && userRefInJSONForm.length()>0) {
+                Log.i(TAG, "User exists in preferences, parsing it.");
+                loggedInUser = gson.fromJson(userRefInJSONForm, User.class);
+            } else {
+                Log.i(TAG, "User doesn't exist in preferences, getting it from server and will save into preferences");
+                String deviceId = preferences.getString(Util.PREF_KEY_DEVICEID, "");
+                loggedInUser =(deviceId!=null && deviceId.length()>0) ? getUserByDeviceId(deviceId) : null;
+                if (loggedInUser != null) {
+                    String userInJSONForm = gson.toJson(loggedInUser);
+                    preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
+                }
+            }
+        } else {
+            String deviceId =getDeviceId(context);
+            loggedInUser = getUserByDeviceId(deviceId);
+            if (loggedInUser != null) {
+                String userInJSONForm = gson.toJson(loggedInUser);
+                preferences.edit().putString(Util.PREF_KEY_USER, userInJSONForm).apply();
+            }
+        }
+
+        if (loggedInUser != null && preferences.getString(Util.PREF_GCM_TOKEN, "").length()<=0) {
+            Intent itent = new Intent(context, GCMRegistrationIntentService.class);
+            itent.putExtra("userId", loggedInUser.getUserId());
+            context.startService(itent);
+        }
+
+        Log.i(TAG, "Logged In User :" + loggedInUser);
+
+        return loggedInUser;
+    }
+
+
+    public static User getUserByDeviceId(String deviceId) {
+        try {
+            User user = new CheckUserRegisterationWorker().execute(deviceId).get();
+            Log.i(TAG, "User is registered:" + ((user != null) ? user.getDeviceInfo().getDeviceId() : "No"));
+            return user;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean isUserRegistered(Context context) {
+        User loggedInUser=loadUser(context);
+        if(loggedInUser!=null){
+            return true;
+        }
+        return false;
+    }
 }

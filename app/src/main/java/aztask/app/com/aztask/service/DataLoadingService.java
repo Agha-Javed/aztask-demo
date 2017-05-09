@@ -43,8 +43,7 @@ public class DataLoadingService extends IntentService {
     }
 
     private void downloadNearByTasks(){
-        String[] params={Util.prepareRequestForNearbyTasks(getApplicationContext())};
-        new NearbyTasksDownloader(getApplicationContext(),false).execute(params);
+        new NearbyTasksDownloader(getApplicationContext(),false).execute();
     }
 
     private void downloadAssignedTasks(){

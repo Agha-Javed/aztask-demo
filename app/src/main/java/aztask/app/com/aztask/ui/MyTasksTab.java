@@ -135,7 +135,7 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
             @Override
             public void onClick(View view) {
                 Intent intent = null;
-                if (MainActivity.isUserRegistered()) {
+                if (Util.isUserRegistered(getContext())) {
                     intent = new Intent(getContext(), CreateTaskActivity.class);
                 } else {
                     intent = new Intent(getContext(), UserRegisterationActivity.class);
@@ -468,7 +468,7 @@ public class MyTasksTab extends Fragment implements LoaderManager.LoaderCallback
                 getContext().getContentResolver().delete(deleteURI,null,null);
 
 
-                String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/task/" + taskId + "/delete";
+                String link = Util.SERVER_URL + "/user/" + Util.getUserId(getContext()) + "/task/" + taskId + "/delete";
                 Log.d(TAG, "Link:" + link);
 
                 URL url = new URL(link);

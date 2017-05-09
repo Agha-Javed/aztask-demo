@@ -16,7 +16,7 @@ public class GCMTokenRefreshListenerService extends InstanceIDListenerService {
     @Override
     public void onTokenRefresh() {
         Intent intent = new Intent(this, GCMRegistrationIntentService.class);
-        intent.putExtra("userId", MainActivity.getUserId());
+        intent.putExtra("userId", Util.getUserId(getApplicationContext()));
         startService(intent);
     }
 }

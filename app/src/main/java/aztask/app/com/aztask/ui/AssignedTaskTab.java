@@ -88,7 +88,7 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
             @Override
             public void onClick(View view) {
                 Intent intent;
-                if (MainActivity.isUserRegistered()) {
+                if (Util.isUserRegistered(getContext())) {
                     intent = new Intent(getContext(), CreateTaskActivity.class);
                 } else {
                     intent = new Intent(getContext(), UserRegisterationActivity.class);
@@ -346,7 +346,7 @@ public class AssignedTaskTab extends Fragment implements LoaderManager.LoaderCal
                 Uri deleteURI = ContentUris.withAppendedId(AZTaskContract.ASSIGNED_TASKS_CONTENT_URI, Integer.parseInt(taskId));
                 getContext().getContentResolver().delete(deleteURI,null,null);
 
-                String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/task/" + taskId + "/unassign_task";
+                String link = Util.SERVER_URL + "/user/" + Util.getUserId(getContext()) + "/task/" + taskId + "/unassign_task";
                 Log.d(TAG, "Link:" + link);
 
                 URL url = new URL(link);

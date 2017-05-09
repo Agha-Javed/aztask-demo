@@ -151,7 +151,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             ivCall.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!MainActivity.isUserRegistered()) {
+                    if (!Util.isUserRegistered(null)) {
                         Toast.makeText(MainActivity.getAppContext(), " Please register first.", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -172,7 +172,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
                     int id = (Integer) likeImageView.getTag();
 
-                    if (!MainActivity.isUserRegistered()) {
+                    if (!Util.isUserRegistered(null)) {
                         Toast.makeText(MainActivity.getAppContext(), " Please register first.", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -188,7 +188,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         Intent itent = new Intent(MainActivity.getAppContext(), TaskNotificationService.class);
                         itent.putExtra("action", "likeTask");
                         itent.putExtra("taskId", titleTextView.getId());
-                        itent.putExtra("userId", MainActivity.getUserId());
+                        itent.putExtra("userId", Util.getUserId(null));
                         MainActivity.getAppContext().startService(itent);
                     } else {
 
@@ -198,7 +198,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                         Intent itent = new Intent(MainActivity.getAppContext(), TaskNotificationService.class);
                         itent.putExtra("action", "unLikeTask");
                         itent.putExtra("taskId", titleTextView.getId());
-                        itent.putExtra("userId", MainActivity.getUserId());
+                        itent.putExtra("userId", Util.getUserId(null));
                         MainActivity.getAppContext().startService(itent);
 
                     }

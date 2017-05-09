@@ -24,6 +24,7 @@ public class RebootNotificationRecciver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("RebootNotiRecciver","JAVED:: reboot has been finished, sheduling synch service.");
+        Util.loadUser(context);
         Util.scheduleDataLoaderService(context);
     }
 }

@@ -40,7 +40,7 @@ public class AssignedTasksDownloader extends AsyncTask<Void, Void, String> {
         Log.i(TAG, "Downloading assigned tasks.");
         StringBuilder response = new StringBuilder("");
 
-        String link = Util.SERVER_URL + "/user/" + MainActivity.getUserId() + "/assigned_tasks";
+        String link = Util.SERVER_URL + "/user/" + Util.getUserId(context) + "/assigned_tasks";
         Log.d(TAG, "Link:" + link);
 
         try {

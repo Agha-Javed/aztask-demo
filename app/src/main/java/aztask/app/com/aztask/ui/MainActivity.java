@@ -51,6 +51,8 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
+import static aztask.app.com.aztask.util.Util.getUserByDeviceId;
+
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     // FINAL STATIC VARIABLES
@@ -94,55 +96,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         refreshImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String[] params={Util.prepareRequestForNearbyTasks(getApplicationContext())};
-                new NearbyTasksDownloader(MainActivity.this,true).execute(params);
+                new NearbyTasksDownloader(MainActivity.this,true).execute();
             }
         });
-
-/*
-
-        final Dialog yourDialog = new Dialog(this);
-        LayoutInflater inflater = (LayoutInflater)this.getSystemService(LAYOUT_INFLATER_SERVICE);
-        View loc_range_layout = inflater.inflate(R.layout.location_range,(ViewGroup)findViewById(R.id.fragmentContainer),false);
-        yourDialog.setContentView(loc_range_layout);
-
-        Button yourDialogButton = (Button)loc_range_layout.findViewById(R.id.loc_dialog_button);
-        yourDialogButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(yourDialog!=null){
-                    yourDialog.dismiss();
-                }
-            }
-        });
-        SeekBar yourDialogSeekBar = (SeekBar)loc_range_layout.findViewById(R.id.loc_dialog_seekbar_id);
-        yourDialogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Snackbar.make((TabLayout) findViewById(R.id.tab_layout),"Location Range Changed.",Snackbar.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-*/
-
-/*
-        View locImg =(ImageView)findViewById(R.id.id_location);
-        locImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ShowDialog();
-            }
-        });
-*/
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
@@ -200,143 +156,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
         }
-        loadUser();
+        loggedInUser=Util.loadUser(getAppContext());
 
         if (checkLocationPermission()) {
             Log.i(TAG, "Phone has location permission");
             setupGoogleApiClient();
-            //    proceedWithPermission();
-        } else {
-            Log.i(TAG, "Phone doesn't has location permission,so will return general tasks.");
-            //  proceedWithoutPermission();
         }
 
     }
 
-    public void ShowDialog()
-    {
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Distance");
-        //alert.setMessage("select distance range");
-
-        LinearLayout linear=new LinearLayout(this);
-
-        linear.setOrientation(LinearLayout.VERTICAL);
-
-        start=-10;		//you need to give starting value of SeekBar
-        end=10;			//you need to give end value of SeekBar
-        start_pos=5;		//you need to give starting position value of SeekBar
-
-        start_position=(int) (((start_pos-start)/(end-start))*100);
-        discrete=start_pos;
-
-        SeekBar seek=new SeekBar(this);
-        seek.setProgress(start_position);
-        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-                //Do something here with new value
-                float temp=progress;
-                float dis=end-start;
-                discrete=(start+((temp/100)*dis));
-
-            }
-
-            public void onStartTrackingTouch(SeekBar arg0) {
-                // TODO Auto-generated method stub
-
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(getBaseContext(), "discrete = "
-                        +String.valueOf(discrete), Toast.LENGTH_SHORT).show();
-
-            }
-        });
-
-        linear.addView(seek);
-
-        alert.setView(linear);
-
-        alert.setPositiveButton("Ok",new DialogInterface.OnClickListener()
-        {
-            public void onClick(DialogInterface dialog,int id)
-            {
-                Toast.makeText(getApplicationContext(), "OK Pressed",
-                        Toast.LENGTH_LONG).show();
-                finish();
-            }
-        });
-
-        alert.setNegativeButton("Cancel",new DialogInterface.OnClickListener()
-        {
-            public void onClick(DialogInterface dialog,int id)
-            {
-                Toast.makeText(getApplicationContext(), "Cancel Pressed",
-                        Toast.LENGTH_LONG).show();
-                finish();
-            }
-        });
-
-        alert.show();
-
-/*
-
-        final AlertDialog.Builder popDialog = new AlertDialog.Builder(this);
-        final SeekBar seek = new SeekBar(this);
-        seek.setMax(100);
-
-        popDialog.setIcon(android.R.drawable.btn_star_big_on);
-        popDialog.setTitle("Please Select Rank 1-100 ");
-        popDialog.setView(seek);
-
-        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-                //Do something here with new value
-                Snackbar.make((TabLayout) findViewById(R.id.tab_layout),"Location Range Changed.",Snackbar.LENGTH_SHORT).show();
-            }
-
-            public void onStartTrackingTouch(SeekBar arg0) {
-                // TODO Auto-generated method stub
-
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-
-            }
-        });
-
-        popDialog.setPositiveButton("OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-
-                });
-
-
-        popDialog.create();
-        popDialog.show();
-*/
-
-    }
-/*
-    private String prepareRequestForNearbyTasks() {
-        try {
-            final JSONObject request = new JSONObject();
-            Location location = Util.getDeviceLocation();
-            request.put("latitude", "" + location.getLatitude());
-            request.put("longitude", "" + location.getLongitude());
-            request.put("userId", MainActivity.getUserId());
-            return request.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return "";
-    }
-*/
     private void setupGoogleApiClient() {
         Log.i(TAG, "Setting up google api client.");
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -365,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+/*
     private User getUserByDeviceId(String deviceId) {
         try {
             User user = new CheckUserRegisterationWorker().execute(deviceId).get();
@@ -375,24 +205,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         return null;
     }
+*/
 
     public static Context getAppContext() {
         return appContext;
     }
-
-    public static int getUserId() {
-        return (loggedInUser != null) ? loggedInUser.getUserId() : 0;
-    }
-
-    public static boolean isUserRegistered() {
-        Log.i(TAG, "isUserRegistered::" + ((loggedInUser != null) ? true : false));
-        return (loggedInUser != null) ? true : false;
-    }
-
-    public static User getRegisteredUser() {
-        return loggedInUser;
-    }
-
 
 
     @Override
@@ -436,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return true;
     }
 
-    private void loadUser() {
+ /*   private void loadUser() {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Gson gson = new Gson();
@@ -473,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
         Log.i(TAG, "Logged In User :" + loggedInUser);
-    }
+    }*/
 
     @Override
     public void onBackPressed() {

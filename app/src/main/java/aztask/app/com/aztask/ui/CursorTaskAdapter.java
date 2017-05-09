@@ -30,13 +30,16 @@ import static aztask.app.com.aztask.R.id.msg;
 public class CursorTaskAdapter  extends CursorRecyclerViewAdapter<CursorTaskAdapter.TaskViewHolder> {
 
     private int attachedTab;
+    private Context context;
 
     public CursorTaskAdapter(Context context, Cursor cursor){
         super(context,cursor);
+        this.context=context;
     }
     public CursorTaskAdapter(int attachedTab,Context context, Cursor cursor){
         super(context,cursor);
         this.attachedTab =attachedTab;
+        this.context=context;
     }
 
     @Override
@@ -164,7 +167,7 @@ public class CursorTaskAdapter  extends CursorRecyclerViewAdapter<CursorTaskAdap
             ivCall.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!MainActivity.isUserRegistered()) {
+                    if (!Util.isUserRegistered(context)) {
                         Toast.makeText(MainActivity.getAppContext(), " Please register first.", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -185,7 +188,7 @@ public class CursorTaskAdapter  extends CursorRecyclerViewAdapter<CursorTaskAdap
 
                     int id = (Integer) likeImageView.getTag();
 
-                    if (!MainActivity.isUserRegistered()) {
+                    if (!Util.isUserRegistered(context)) {
                         Toast.makeText(MainActivity.getAppContext(), " Please register first.", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -200,7 +203,7 @@ public class CursorTaskAdapter  extends CursorRecyclerViewAdapter<CursorTaskAdap
                         Intent itent = new Intent(MainActivity.getAppContext(), TaskNotificationService.class);
                         itent.putExtra("action", "likeTask");
                         itent.putExtra("taskId", titleTextView.getId());
-                        itent.putExtra("userId", MainActivity.getUserId());
+                        itent.putExtra("userId", Util.getUserId(context));
                         itent.putExtra("attachedTab", attachedTab);
 
                         MainActivity.getAppContext().startService(itent);
@@ -212,7 +215,7 @@ public class CursorTaskAdapter  extends CursorRecyclerViewAdapter<CursorTaskAdap
                         Intent itent = new Intent(MainActivity.getAppContext(), TaskNotificationService.class);
                         itent.putExtra("action", "unLikeTask");
                         itent.putExtra("taskId", titleTextView.getId());
-                        itent.putExtra("userId", MainActivity.getUserId());
+                        itent.putExtra("userId", Util.getUserId(context));
                         itent.putExtra("attachedTab", attachedTab);
 
                         MainActivity.getAppContext().startService(itent);

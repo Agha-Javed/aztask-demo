@@ -81,7 +81,7 @@ public class NearByTasksTab extends Fragment implements LoaderManager.LoaderCall
             @Override
             public void onClick(View view) {
                 Intent intent = null;
-                if (MainActivity.isUserRegistered()) {
+                if (Util.isUserRegistered(getContext())) {
                     intent = new Intent(getContext(), CreateTaskActivity.class);
                 } else {
                     intent = new Intent(getContext(), UserRegisterationActivity.class);
